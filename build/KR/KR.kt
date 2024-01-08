@@ -36,6 +36,7 @@ object __KR {
 	object KRAudio {
 		val __file get() = resourcesVfs["audio"]
 		@ResourceVfsPath("audio/main_sound.mp3") val `mainSound` get() = TypedVfsFileSound(resourcesVfs["audio/main_sound.mp3"])
+		@ResourceVfsPath("audio/select.mp3") val `select` get() = TypedVfsFileSound(resourcesVfs["audio/select.mp3"])
 	}
 	
 	object KRFonts {
