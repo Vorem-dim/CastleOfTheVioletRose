@@ -3,7 +3,6 @@ import korlibs.time.*
 import korlibs.korge.*
 import korlibs.korge.scene.*
 import korlibs.korge.view.*
-import korlibs.image.color.*
 import korlibs.image.font.*
 import korlibs.image.format.*
 import korlibs.image.text.*
