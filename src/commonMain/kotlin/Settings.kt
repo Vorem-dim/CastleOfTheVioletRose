@@ -11,7 +11,8 @@ data class Settings(
         "MainText" to RGBA(127, 0, 255),
         "CommonText" to RGBA(57, 0, 185),
         "Unavailable" to RGBA(70, 70, 70),
-        "Button" to RGBA(0)
+        "Button" to RGBA(0),
+        "Slider" to RGBA(0, 150, 150)
     ),
     var violetRose: Int = 0,
 

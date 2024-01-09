@@ -8,6 +8,8 @@ import korlibs.image.format.*
 import korlibs.image.text.*
 import korlibs.korge.animate.*
 import korlibs.korge.input.*
+import korlibs.korge.style.*
+import korlibs.korge.ui.*
 import korlibs.korge.view.align.*
 import korlibs.math.geom.*
 import korlibs.math.interpolation.*
@@ -18,11 +20,16 @@ suspend fun main() = Korge {
 }
 
 class MainScene : Scene() {
+    private lateinit var soundChannel: SoundChannel
     private lateinit var settings: Settings
     private lateinit var background: Image
     private lateinit var textTitles: Array<Text>
     private lateinit var buttons: Array<RoundRect>
     private lateinit var textButtons: Array<Text>
+    private lateinit var textScenes: Array<Text>
+    private lateinit var textSettings: Array<Text>
+    private lateinit var returnButton: RoundRect
+
     override suspend fun SContainer.sceneInit() {
         settings = Settings(
             mapOf(
@@ -36,6 +43,7 @@ class MainScene : Scene() {
                 "Select" to KR.audio.select.__file.readMusic()
             )
         )
+
         settings.music.values.forEach { music -> music.volume = settings.musicVolume }
         settings.sound.values.forEach { sound -> sound.volume = settings.soundVolume }
 
@@ -76,7 +84,7 @@ class MainScene : Scene() {
         }
 
         val text = arrayOf("New game", "Continue", "Violet Rose", "Select hero", "Settings")
-        textButtons = Array(5) { index ->
+        textButtons = Array(text.size) { index ->
             text(text[index]).also {
                 it.textSize = 40.0
                 it.color = if (settings.violetRose != 3 && index == 2)
@@ -87,48 +95,145 @@ class MainScene : Scene() {
                 it.alpha = .0
             }
         }
-    }
-    override suspend fun SContainer.sceneMain() {
-        settings.music["MainSound"]!!.play(PlaybackTimes.INFINITE)
 
-        background.addTo(this)
+        textScenes = Array(text.size) { index ->
+            text(text[index]).also {
+                it.textSize = 80.0
+                it.color = settings.colors["MainText"]!!
+                it.font = settings.fonts["Primary"]!!
+                it.alpha = .0
+            }.centerXOn(this)
+        }
 
-        textTitles.forEach { text -> text.addTo(this) }
-
-        animator {
-            parallel { alpha(background, 1, TimeSpan.fromSeconds(2), Easing.EASE_IN) }
-            parallel { alpha(textTitles[0], 1, TimeSpan.fromSeconds(2), Easing.EASE_IN) }
-        }.awaitComplete()
-
-        var userTouch = true
-        while(userTouch) {
-            blinking(textTitles[1], TimeSpan.fromSeconds(1)).awaitComplete()
-            onClick {
-                userTouch = false
-                settings.sound["Select"]!!.play()
+        val settingsText = arrayOf("Music", "Sound", "Back")
+        textSettings = Array(settingsText.size) { index ->
+            text(settingsText[index]).also {
+                it.textSize = 60.0
+                it.color = settings.colors["CommonText"]!!
+                it.font = settings.fonts["Primary"]!!
+                it.alpha = .0
             }
         }
 
-        animator {
-            parallel { alpha(textTitles[1], .0, TimeSpan.fromSeconds(1), Easing.EASE_IN) }
-            parallel { alpha(textTitles[0], .0, TimeSpan.fromSeconds(2), Easing.EASE_IN) }
-        }.awaitComplete()
-        textTitles.forEach { text -> text.removeFromParent() }
+        returnButton = RoundRect(
+            Size(.2 * this.width, textSettings.last().height),
+            RectCorners(30,15,15, 30)
+        ).also {
+            it.y = this.height - it.height
+            it.color = settings.colors["Button"]!!
+            it.alpha = .0
+        }.centerXOn(this)
+    }
 
-        buttons.forEach { button -> button.addTo(this) }
-        textButtons.forEachIndexed { index, textButton -> textButton.addTo(this).centerOn(buttons[index]) }
+    override suspend fun SContainer.sceneMain() {
+        soundChannel = settings.music["MainSound"]!!.play(PlaybackTimes.INFINITE)
 
-        animator {
-            parallel { buttons.forEach { alpha(it, .5, TimeSpan.fromSeconds(1), Easing.EASE_IN_OUT) } }
-            parallel { textButtons.forEach { alpha(it, 1, TimeSpan.fromSeconds(1), Easing.EASE_IN_OUT) } }
+        val button = SolidRect(Size(width, height), settings.colors["Button"]!!)
+        visibleScene(this, button, background, *textTitles)
+        visibleViews(1.0, TimeSpan.fromSeconds(2), Easing.EASE_IN, background).awaitComplete()
+        visibleViews(1.0, TimeSpan.fromSeconds(2), Easing.EASE_IN, textTitles[0]).awaitComplete()
+
+        var userTouch = false
+        while(!userTouch) {
+            blinking(textTitles[1], TimeSpan.fromSeconds(1)).awaitComplete()
+            button.onClick {
+                userTouch = true
+                settings.sound["Select"]!!.play()
+            }
+        }
+        visibleViews(.0, TimeSpan.fromSeconds(1), Easing.EASE_IN, *textTitles).awaitComplete()
+        cleanScene(button, *textTitles)
+        sceneMainButtons()
+    }
+
+    private suspend fun SContainer.sceneMainButtons() {
+        visibleScene(this, *buttons, *textButtons)
+        textButtons.forEachIndexed { index, textButton -> textButton.centerOn(buttons[index]) }
+        visibleViews(.5, TimeSpan.fromSeconds(1), Easing.EASE_IN, *buttons)
+        visibleViews(1.0, TimeSpan.fromSeconds(1), Easing.EASE_IN, *textButtons)
+
+        buttons[0].onClick {
+            visibleViews(.0, TimeSpan.fromSeconds(1), Easing.EASE_IN, *textButtons, *buttons).awaitComplete()
+            cleanScene(*buttons, *textButtons)
+        }
+        buttons[1].onClick {
+            visibleViews(.0, TimeSpan.fromSeconds(1), Easing.EASE_IN, *textButtons, *buttons).awaitComplete()
+            cleanScene(*buttons, *textButtons)
+        }
+        buttons[2].onClick {
+            if (settings.violetRose == 3) {
+                visibleViews(.0, TimeSpan.fromSeconds(1), Easing.EASE_IN, *textButtons, *buttons).awaitComplete()
+                cleanScene(*buttons, *textButtons)
+            }
+        }
+        buttons[3].onClick {
+            visibleViews(.0, TimeSpan.fromSeconds(1), Easing.EASE_IN, *textButtons, *buttons).awaitComplete()
+            cleanScene(*buttons, *textButtons)
+        }
+        buttons[4].onClick {
+            visibleViews(.0, TimeSpan.fromSeconds(1), Easing.EASE_IN, *textButtons, *buttons).awaitComplete()
+            cleanScene(*buttons, *textButtons)
+            sceneSettings()
         }
     }
+
+    private suspend fun SContainer.sceneSettings() {
+        val sliders = arrayOf(
+            uiSlider(settings.musicVolume, .0, 1, .1, size=Size(.3 * this.width, 50)) {
+                showTooltip = false
+                alpha = .0
+                styles { uiSelectedColor = settings.colors["Slider"]!! }
+                changed { volume ->
+                    settings.musicVolume = volume
+                    soundChannel.volume = volume
+                }
+            },
+            uiSlider(settings.soundVolume, .0, 1, .1, size=Size(.3 * this.width, 50)) {
+                showTooltip = false
+                alpha = .0
+                styles { uiSelectedColor = settings.colors["Slider"]!! }
+                changed { volume ->
+                    settings.soundVolume = volume
+                    settings.sound["Select"]!!.volume = volume
+                }
+            }
+        )
+
+        val stack = uiVerticalStack(padding=20.0) {
+            for (i in 0 until textSettings.size - 1) {
+                uiHorizontalStack(padding=10.0) {
+                    visibleScene(this, textSettings[i], sliders[i])
+                    sliders[i].centerYOn(this)
+                }
+            }
+        }.centerOn(this)
+
+        visibleScene(this, textScenes[4], returnButton, textSettings.last())
+        textSettings.last().centerOn(returnButton)
+        visibleViews(.7, TimeSpan.fromSeconds(1), Easing.EASE_IN, returnButton)
+        visibleViews(1.0, TimeSpan.fromSeconds(1), Easing.EASE_IN, textScenes[4], *textSettings, *sliders).awaitComplete()
+
+        returnButton.onClick {
+            visibleViews(.0, TimeSpan.fromSeconds(1), Easing.EASE_IN, textScenes[4], returnButton, *textSettings, *sliders).awaitComplete()
+            cleanScene(stack, textScenes[4], returnButton, *textSettings)
+            sceneMainButtons()
+        }
+    }
+
     private fun SContainer.blinking(text: Text, time: TimeSpan): Animator {
         val blink = animator()
         if (text.alpha == 1.0)
-            blink.sequence { alpha(text, .5, time, Easing.EASE_IN) }
+            blink.sequence { parallel { alpha(text, .5, time, Easing.EASE_IN) } }
         else
-            blink.sequence { alpha(text, 1, time, Easing.EASE_IN) }
+            blink.sequence { parallel { alpha(text, 1, time, Easing.EASE_IN) } }
         return blink
     }
+
+    private fun visibleScene(parent: Container, vararg views: View) { views.forEach { view -> view.addTo(parent) } }
+
+    private fun SContainer.visibleViews(alpha: Double, time: TimeSpan, easing: Easing, vararg views: View): Animator {
+        return animator { parallel { views.forEach { view -> alpha(view, alpha, time, easing) } } }
+    }
+
+    private fun cleanScene(vararg views: View) { views.forEach { view -> view.removeFromParent() } }
 }
