@@ -31,6 +31,7 @@ object __KR {
 		@ResourceVfsPath("audio") val `audio` get() = __KR.KRAudio
 		@ResourceVfsPath("fonts") val `fonts` get() = __KR.KRFonts
 		@ResourceVfsPath("images") val `images` get() = __KR.KRImages
+		@ResourceVfsPath("sprites") val `sprites` get() = __KR.KRSprites
 	}
 	
 	object KRAudio {
@@ -49,5 +50,19 @@ object __KR {
 		val __file get() = resourcesVfs["images"]
 		@ResourceVfsPath("images/icon_rose.png") val `iconRose` get() = TypedVfsFileBitmap(resourcesVfs["images/icon_rose.png"])
 		@ResourceVfsPath("images/main_screen.jpg") val `mainScreen` get() = TypedVfsFileBitmap(resourcesVfs["images/main_screen.jpg"])
+	}
+	
+	object KRSprites {
+		val __file get() = resourcesVfs["sprites"]
+		@ResourceVfsPath("sprites/bosses") val `bosses` get() = __KR.KRSpritesBosses
+		@ResourceVfsPath("sprites/heroes") val `heroes` get() = __KR.KRSpritesHeroes
+	}
+	
+	object KRSpritesBosses {
+		val __file get() = resourcesVfs["sprites/bosses"]
+	}
+	
+	object KRSpritesHeroes {
+		val __file get() = resourcesVfs["sprites/heroes"]
 	}
 }
