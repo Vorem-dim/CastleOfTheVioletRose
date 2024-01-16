@@ -1,6 +1,5 @@
 import korlibs.audio.sound.*
 import korlibs.image.atlas.*
-import korlibs.image.color.*
 import korlibs.time.*
 import korlibs.korge.*
 import korlibs.korge.scene.*
@@ -10,16 +9,13 @@ import korlibs.image.format.*
 import korlibs.image.text.*
 import korlibs.io.file.std.*
 import korlibs.korge.animate.*
-import korlibs.korge.box2d.*
 import korlibs.korge.input.*
 import korlibs.korge.style.*
 import korlibs.korge.ui.*
 import korlibs.korge.view.Circle
 import korlibs.korge.view.align.*
-import korlibs.korge.view.collision.*
 import korlibs.math.geom.*
 import korlibs.math.interpolation.*
-import org.jbox2d.dynamics.*
 
 
 suspend fun main() = Korge {
@@ -33,6 +29,7 @@ class MainScene : Scene() {
     private lateinit var background: Image
 
     override suspend fun SContainer.sceneInit() {
+        // Set main parameters
         settings = Settings(
             mapOf(
                 "Primary" to KR.fonts.primary.__file.readFont(),
@@ -43,26 +40,35 @@ class MainScene : Scene() {
             ),
             mapOf(
                 "Select" to KR.audio.select.__file.readMusic()
+            ),
+            heroes = mapOf(
+                "Knight" to Hero(resourcesVfs["sprites/heroes/knight.xml"].readAtlas(), this),
+                "Anomaly" to Hero(resourcesVfs["sprites/heroes/anomaly.xml"].readAtlas(), this),
+                "Thief" to Hero(resourcesVfs["sprites/heroes/thief.xml"].readAtlas(), this),
+                "Violet Rose" to Hero(resourcesVfs["sprites/heroes/knight.xml"].readAtlas(), this) // coming soon
             )
         )
 
+        // Set music and sound volume
         settings.music.values.forEach { music -> music.volume = settings.musicVolume }
         settings.sound.values.forEach { sound -> sound.volume = settings.soundVolume }
 
+        // Set background of menu
         background = image(KR.images.mainScreen.__file.readBitmap()) {
             scale(.7, .8)
-            alpha = 0.0
+            alpha = .0
         }.centerOn(this)
     }
 
     override suspend fun SContainer.sceneMain() {
+        // Making TextView for section
         val textTitles = arrayOf(
             text("Castle of the\nviolet rose").also {
                 it.textSize = 80.0
                 it.color = settings.colors["MainText"]!!
                 it.font = settings.fonts["Primary"]!!
                 it.alignment = TextAlignment.CENTER
-                it.alpha = 0.0
+                it.alpha = .0
                 it.centerOn(this)
             },
             text("Tap to continue").also {
@@ -70,45 +76,53 @@ class MainScene : Scene() {
                 it.color = settings.colors["CommonText"]!!
                 it.font = settings.fonts["Secondary"]!!
                 it.alignment = TextAlignment.CENTER
-                it.alpha = 0.0
+                it.alpha = .0
                 it.centerXOn(this)
             }
         )
         textTitles[1].y = textTitles[0].run { y + height }
 
-        soundChannel = settings.music["MainSound"]!!.play(PlaybackTimes.INFINITE)
+        soundChannel = settings.music["MainSound"]!!.play(PlaybackTimes.INFINITE) // Turn on music
 
-        val button = SolidRect(Size(width, height), settings.colors["Button"]!!)
-        visibleScene(this, button, background, *textTitles)
-        visibleViews(1.0, TimeSpan.fromSeconds(2), Easing.EASE_IN, background).awaitComplete()
-        visibleViews(1.0, TimeSpan.fromSeconds(2), Easing.EASE_IN, textTitles[0]).awaitComplete()
+        val button = SolidRect(Size(width, height), settings.colors["Button"]!!) // For screen click
 
+        visibleScene(this, button, background, *textTitles) // Add views on the scene
+
+        // Display views
+        visibleViews(1.0, Easing.EASE_IN, background).awaitComplete()
+        visibleViews(1.0, Easing.EASE_IN, textTitles[0]).awaitComplete()
+
+        // Wait user touch
         var userTouch = false
         while(!userTouch) {
-            blinking(textTitles[1], TimeSpan.fromSeconds(1)).awaitComplete()
+            blinking(textTitles[1], TimeSpan.fromSeconds(1)).awaitComplete() // Blinking animation of text
             button.onClick {
                 userTouch = true
-                settings.sound["Select"]!!.play()
+                settings.sound["Select"]!!.play() // Turn on sound
             }
         }
-        visibleViews(.0, TimeSpan.fromSeconds(1), Easing.EASE_IN, *textTitles).awaitComplete()
-        cleanScene(button, *textTitles)
-        sceneMainButtons()
+
+        visibleViews(.0, Easing.EASE_IN, *textTitles).awaitComplete() // Vanish views
+        cleanScene(button, *textTitles) // Remove views from scene
+        sceneMainButtons() // To main scene
     }
 
     private suspend fun SContainer.sceneMainButtons() {
+        // Making TextView for section
         val text = arrayOf("New game", "Continue", "Violet Rose", "Select hero", "Settings")
         val textSections = Array(text.size) { index ->
-            text(text[index]).also {
-                it.textSize = 40.0
-                it.color = if (settings.violetRose != 3 && index == 2)
+            text(text[index]).apply {
+                textSize = 40.0
+                color = if (settings.violetRose != 3 && index == 2)
                     settings.colors["Unavailable"]!!
                 else
                     settings.colors["CommonText"]!!
-                it.font = settings.fonts["Primary"]!!
-                it.alpha = .0
+                font = settings.fonts["Primary"]!!
+                alpha = .0
             }
         }
+
+        // Making buttons for section and their location
         val buttonAreas = Array(5) { index: Int ->
             RoundRect(
                 Size(.3 * this.width, .1 * this.height),
@@ -120,60 +134,67 @@ class MainScene : Scene() {
             }.centerXOn(this)
         }
 
-        visibleScene(this, *buttonAreas, *textSections)
-        textSections.forEachIndexed { index, textSection -> textSection.centerOn(buttonAreas[index]) }
-        visibleViews(.5, TimeSpan.fromSeconds(1), Easing.EASE_IN, *buttonAreas)
-        visibleViews(1.0, TimeSpan.fromSeconds(1), Easing.EASE_IN, *textSections)
+        visibleScene(this, *buttonAreas, *textSections) // Add views on the scene
+        textSections.forEachIndexed { index, textSection -> textSection.centerOn(buttonAreas[index]) } // Add text to buttons
+
+        // Display views
+        visibleViews(.5, Easing.EASE_IN, *buttonAreas)
+        visibleViews(1.0, Easing.EASE_IN, *textSections)
 
         buttonAreas[0].onClick {
-            visibleViews(.0, TimeSpan.fromSeconds(1), Easing.EASE_IN, *textSections, *buttonAreas).awaitComplete()
-            cleanScene(*buttonAreas, *textSections)
+            visibleViews(.0, Easing.EASE_IN, *textSections, *buttonAreas).awaitComplete() // Vanish views
+            cleanScene(*buttonAreas, *textSections) // Remove views from scene
         }
         buttonAreas[1].onClick {
-            visibleViews(.0, TimeSpan.fromSeconds(1), Easing.EASE_IN, *textSections, *buttonAreas).awaitComplete()
-            cleanScene(*buttonAreas, *textSections)
+            visibleViews(.0, Easing.EASE_IN, *textSections, *buttonAreas).awaitComplete() // Vanish views
+            cleanScene(*buttonAreas, *textSections) // Remove views from scene
         }
         buttonAreas[2].onClick {
             if (settings.violetRose == 3) {
-                visibleViews(.0, TimeSpan.fromSeconds(1), Easing.EASE_IN, *textSections, *buttonAreas).awaitComplete()
-                cleanScene(*buttonAreas, *textSections)
+                visibleViews(.0, Easing.EASE_IN, *textSections, *buttonAreas).awaitComplete() // Vanish views
+                cleanScene(*buttonAreas, *textSections) // Remove views from scene
             }
         }
         buttonAreas[3].onClick {
-            visibleViews(.0, TimeSpan.fromSeconds(1), Easing.EASE_IN, *textSections, *buttonAreas).awaitComplete()
-            cleanScene(*buttonAreas, *textSections)
-            sceneSelectHero(textSections[3])
+            visibleViews(.0, Easing.EASE_IN, *textSections, *buttonAreas).awaitComplete() // Vanish views
+            cleanScene(*buttonAreas, *textSections) // Remove views from scene
+            sceneSelectHero(textSections[3]) // To scene of select heroes
         }
         buttonAreas[4].onClick {
-            visibleViews(.0, TimeSpan.fromSeconds(1), Easing.EASE_IN, *textSections, *buttonAreas).awaitComplete()
-            cleanScene(*buttonAreas, *textSections)
-            sceneSettings(textSections[4])
+            visibleViews(.0, Easing.EASE_IN, *textSections, *buttonAreas).awaitComplete() // Vanish views
+            cleanScene(*buttonAreas, *textSections) // Remove views from scene
+            sceneSettings(textSections[4]) // To settings scene
         }
     }
 
     private suspend fun SContainer.sceneSelectHero(header: Text) {
+        // Making TextView for section
         val text = arrayOf("Knight", "Anomaly", "Thief", "Violet Rose", "Back")
         val textSelect = Array(text.size) { index ->
-            text(text[index]).also {
-                it.textSize = 50.0
-                it.color = settings.colors["CommonText"]!!
-                it.font = settings.fonts["Primary"]!!
-                it.alpha = .0
+            text(text[index]).apply {
+                textSize = 50.0
+                color = settings.colors["CommonText"]!!
+                font = settings.fonts["Primary"]!!
+                alpha = .0
             }
         }
-        header.also {
-            it.y = 0.0
-            it.textSize = 80.0
-            it.color = settings.colors["MainText"]!!
+
+        // Header of section
+        header.apply {
+            y = .0
+            textSize = 80.0
+            color = settings.colors["MainText"]!!
         }.centerXOn(this)
 
+        // Pedestals for heroes
         val heroAreas = Array(4) {
-            Circle(90.0).also {
-                it.color = settings.colors["Button"]!!
-                it.alpha = .0
+            Circle(90.0).apply {
+                color = settings.colors["Button"]!!
+                alpha = .0
             }
         }
 
+        // Button to main scene
         val returnButton = RoundRect(
             Size(.2 * this.width, 60),
             RectCorners(30,15,15, 30)
@@ -183,6 +204,7 @@ class MainScene : Scene() {
             it.alpha = .0
         }.centerXOn(this)
 
+        // Location heroes pedestals and TextView
         val stack = uiVerticalStack(padding=20.0) {
             uiHorizontalStack(padding=40.0) {
                 for (i in 0 until heroAreas.size - 1) {
@@ -199,34 +221,69 @@ class MainScene : Scene() {
             }
         }.centerOn(this)
 
-        visibleScene(this, header, returnButton, textSelect.last())
-        textSelect.last().centerOn(returnButton)
-        visibleViews(.8, TimeSpan.fromSeconds(1), Easing.EASE_IN, returnButton, *heroAreas)
-        visibleViews(1.0, TimeSpan.fromSeconds(1), Easing.EASE_IN, header, *textSelect).awaitComplete()
+        // Making array of sprites and their location
+        val heroes: Array<Sprite> = Array(4) { index: Int ->
+            var parent: Container = this
+            settings.run {
+                if (index == this.heroes.size - 1 && violetRose != 3) parent = heroAreas[index]
+                this.heroes[text[index]]!!.run {
+                    if (selectedHeroes[index]) {
+                        stand.run {
+                            addTo(parent).centerOn(heroAreas[index])
+                            this
+                        }
+                    } else
+                        death.run {
+                            addTo(parent).centerOn(heroAreas[index])
+                            this
+                        }
+                }
+            }
+        }
+
+        visibleScene(this, header, returnButton, textSelect.last()) // Add views on the scene
+        textSelect.last().centerOn(returnButton) // Add text to the button
+
+        // Display views
+        visibleViews(.8, Easing.EASE_IN, returnButton, *heroAreas)
+        visibleViews(1.0, Easing.EASE_IN, header, *textSelect, *heroes).awaitComplete()
+
+        // Animation of heroes
+        for (i in heroes.indices) {
+            if (settings.selectedHeroes[i])
+                heroes[i].playAnimationLooped(spriteDisplayTime = TimeSpan.fromSeconds(.15))
+            else
+                heroes[i].playAnimation(spriteDisplayTime = TimeSpan.fromSeconds(.1))
+        }
 
         returnButton.onClick {
-            visibleViews(.0, TimeSpan.fromSeconds(1), Easing.EASE_IN, header, returnButton, *textSelect, *heroAreas).awaitComplete()
-            cleanScene(header, returnButton, *textSelect, stack)
-            sceneMainButtons()
+            visibleViews(.0, Easing.EASE_IN, header, returnButton, *textSelect, *heroAreas, *heroes).awaitComplete() // Vanish views
+            heroes.forEach { hero: Sprite -> hero.playAnimation() } // Stop animation of heroes
+            cleanScene(header, returnButton, stack, *heroes) // Remove views from scene
+            sceneMainButtons() // To main scene
         }
     }
 
     private suspend fun SContainer.sceneSettings(header: Text) {
+        // Making TextView for section
         val text = arrayOf("Music", "Sound", "Back")
         val textSettings = Array(text.size) { index ->
-            text(text[index]).also {
-                it.textSize = 60.0
-                it.color = settings.colors["CommonText"]!!
-                it.font = settings.fonts["Primary"]!!
-                it.alpha = .0
+            text(text[index]).apply {
+                textSize = 40.0
+                color = settings.colors["CommonText"]!!
+                font = settings.fonts["Primary"]!!
+                alpha = .0
             }
         }
-        header.also {
-            it.y = 0.0
-            it.textSize = 80.0
-            it.color = settings.colors["MainText"]!!
+
+        // Header of section
+        header.apply {
+            y = 0.0
+            textSize = 80.0
+            color = settings.colors["MainText"]!!
         }.centerXOn(this)
 
+        // Button to main scene
         val returnButton = RoundRect(
             Size(.2 * this.width, 60),
             RectCorners(30,15,15, 30)
@@ -236,6 +293,7 @@ class MainScene : Scene() {
             it.alpha = .0
         }.centerXOn(this)
 
+        // Params of settings section
         val params = arrayOf(
             uiSlider(settings.musicVolume, .0, 1, .1, size=Size(.3 * this.width, 50)) {
                 showTooltip = false
@@ -257,6 +315,7 @@ class MainScene : Scene() {
             }
         )
 
+        // Location of params
         val stack = uiVerticalStack(padding=20.0) {
             for (i in 0 until textSettings.size - 1) {
                 uiHorizontalStack(padding=10.0) {
@@ -266,15 +325,17 @@ class MainScene : Scene() {
             }
         }.centerOn(this)
 
-        visibleScene(this, header, returnButton, textSettings.last())
-        textSettings.last().centerOn(returnButton)
-        visibleViews(.8, TimeSpan.fromSeconds(1), Easing.EASE_IN, returnButton)
-        visibleViews(1.0, TimeSpan.fromSeconds(1), Easing.EASE_IN, header, *textSettings, *params).awaitComplete()
+        visibleScene(this, header, returnButton, textSettings.last()) // Add views on the scene
+        textSettings.last().centerOn(returnButton) // Add text to the button
+
+        // Display views
+        visibleViews(.8, Easing.EASE_IN, returnButton)
+        visibleViews(1.0, Easing.EASE_IN, header, *textSettings, *params).awaitComplete()
 
         returnButton.onClick {
-            visibleViews(.0, TimeSpan.fromSeconds(1), Easing.EASE_IN, header, returnButton, *textSettings, *params).awaitComplete()
-            cleanScene(stack, header, returnButton, *textSettings)
-            sceneMainButtons()
+            visibleViews(.0, Easing.EASE_IN, header, returnButton, *textSettings, *params).awaitComplete() // Vanish views
+            cleanScene(stack, header, returnButton, *textSettings) // Remove views from scene
+            sceneMainButtons() // To main scene
         }
     }
 
@@ -287,11 +348,11 @@ class MainScene : Scene() {
         return blink
     }
 
-    private fun visibleScene(parent: Container, vararg views: View) { views.forEach { view -> view.addTo(parent) } }
-
-    private fun SContainer.visibleViews(alpha: Double, time: TimeSpan, easing: Easing, vararg views: View): Animator {
-        return animator { parallel { views.forEach { view -> alpha(view, alpha, time, easing) } } }
+    private fun SContainer.visibleViews(alpha: Double, easing: Easing, vararg views: View): Animator {
+        return animator { parallel { views.forEach { view -> alpha(view, alpha, 1.2.seconds, easing) } } }
     }
+
+    private fun visibleScene(parent: Container, vararg views: View) { views.forEach { view -> view.addTo(parent) } }
 
     private fun cleanScene(vararg views: View) { views.forEach { view -> view.removeFromParent() } }
 }
