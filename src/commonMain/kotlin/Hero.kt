@@ -1,5 +1,6 @@
 import korlibs.image.atlas.*
 import korlibs.korge.view.*
+import kotlinx.coroutines.*
 
 class Hero(atlas: Atlas, container: Container) {
     val stand: Sprite
@@ -7,7 +8,8 @@ class Hero(atlas: Atlas, container: Container) {
     val attack: Sprite
     val hit: Sprite
     val death: Sprite
-    private var deathAnimation: Boolean = true
+    var deathAnimation: Boolean = true
+
     init {
         atlas.apply {
             stand = container.sprite(getSpriteAnimation("stand")).apply { alpha = .0 }

@@ -31,7 +31,6 @@ object __KR {
 		@ResourceVfsPath("audio") val `audio` get() = __KR.KRAudio
 		@ResourceVfsPath("fonts") val `fonts` get() = __KR.KRFonts
 		@ResourceVfsPath("images") val `images` get() = __KR.KRImages
-		@ResourceVfsPath("map") val `map` get() = __KR.KRMap
 		@ResourceVfsPath("sprites") val `sprites` get() = __KR.KRSprites
 	}
 	
@@ -53,20 +52,10 @@ object __KR {
 		@ResourceVfsPath("images/main_screen.jpg") val `mainScreen` get() = TypedVfsFileBitmap(resourcesVfs["images/main_screen.jpg"])
 	}
 	
-	object KRMap {
-		val __file get() = resourcesVfs["map"]
-		@ResourceVfsPath("map/simplified") val `simplified` get() = __KR.KRMapSimplified
-	}
-	
 	object KRSprites {
 		val __file get() = resourcesVfs["sprites"]
 		@ResourceVfsPath("sprites/bosses") val `bosses` get() = __KR.KRSpritesBosses
 		@ResourceVfsPath("sprites/heroes") val `heroes` get() = __KR.KRSpritesHeroes
-	}
-	
-	object KRMapSimplified {
-		val __file get() = resourcesVfs["map/simplified"]
-		@ResourceVfsPath("map/simplified/AutoLayer") val `autolayer` get() = __KR.KRMapSimplifiedAutolayer
 	}
 	
 	object KRSpritesBosses {
@@ -78,14 +67,5 @@ object __KR {
 		@ResourceVfsPath("sprites/heroes/anomaly.png") val `anomaly` get() = TypedVfsFileBitmap(resourcesVfs["sprites/heroes/anomaly.png"])
 		@ResourceVfsPath("sprites/heroes/knight.png") val `knight` get() = TypedVfsFileBitmap(resourcesVfs["sprites/heroes/knight.png"])
 		@ResourceVfsPath("sprites/heroes/thief.png") val `thief` get() = TypedVfsFileBitmap(resourcesVfs["sprites/heroes/thief.png"])
-	}
-	
-	object KRMapSimplifiedAutolayer {
-		val __file get() = resourcesVfs["map/simplified/AutoLayer"]
-		@ResourceVfsPath("map/simplified/AutoLayer/IntGrid_layer-int.png") val `intgridLayerInt` get() = TypedVfsFileBitmap(resourcesVfs["map/simplified/AutoLayer/IntGrid_layer-int.png"])
-		@ResourceVfsPath("map/simplified/AutoLayer/IntGrid_layer.csv") val `intgridLayer` get() = TypedVfsFile(resourcesVfs["map/simplified/AutoLayer/IntGrid_layer.csv"])
-		@ResourceVfsPath("map/simplified/AutoLayer/_bg.png") val `bg` get() = TypedVfsFileBitmap(resourcesVfs["map/simplified/AutoLayer/_bg.png"])
-		@ResourceVfsPath("map/simplified/AutoLayer/_composite.png") val `composite` get() = TypedVfsFileBitmap(resourcesVfs["map/simplified/AutoLayer/_composite.png"])
-		@ResourceVfsPath("map/simplified/AutoLayer/data.json") val `data` get() = TypedVfsFile(resourcesVfs["map/simplified/AutoLayer/data.json"])
 	}
 }

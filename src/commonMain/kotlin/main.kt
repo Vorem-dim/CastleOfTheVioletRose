@@ -17,7 +17,6 @@ import korlibs.korge.view.align.*
 import korlibs.math.geom.*
 import korlibs.math.interpolation.*
 
-
 suspend fun main() = Korge {
     val sceneContainer = sceneContainer()
     sceneContainer.changeTo { MainScene() }
@@ -36,10 +35,10 @@ class MainScene : Scene() {
                 "Secondary" to KR.fonts.secondary.__file.readFont()
             ),
             mapOf(
-                "MainSound" to KR.audio.mainSound.__file.readMusic()
+                "MainSound" to KR.audio.mainSound.__file.readSound()
             ),
             mapOf(
-                "Select" to KR.audio.select.__file.readMusic()
+                "Select" to KR.audio.select.__file.readSound()
             ),
             heroes = mapOf(
                 "Knight" to Hero(resourcesVfs["sprites/heroes/knight.xml"].readAtlas(), this),
@@ -61,28 +60,32 @@ class MainScene : Scene() {
     }
 
     override suspend fun SContainer.sceneMain() {
+        soundChannel = settings.music["MainSound"]!!.play(PlaybackTimes.INFINITE) // Turn on music
+
         // Making TextView for section
         val textTitles = arrayOf(
             text("Castle of the\nviolet rose").also {
-                it.textSize = 80.0
-                it.color = settings.colors["MainText"]!!
-                it.font = settings.fonts["Primary"]!!
+                settings.apply {
+                    it.textSize = textSizes["Header"]!!
+                    it.color = colors["MainText"]!!
+                    it.font = fonts["Primary"]!!
+                }
                 it.alignment = TextAlignment.CENTER
                 it.alpha = .0
                 it.centerOn(this)
             },
             text("Tap to continue").also {
-                it.textSize = 30.0
-                it.color = settings.colors["CommonText"]!!
-                it.font = settings.fonts["Secondary"]!!
+                settings.apply {
+                    it.textSize = textSizes["SmallText"]!!
+                    it.color = colors["CommonText"]!!
+                    it.font = fonts["Secondary"]!!
+                }
                 it.alignment = TextAlignment.CENTER
                 it.alpha = .0
                 it.centerXOn(this)
             }
         )
         textTitles[1].y = textTitles[0].run { y + height }
-
-        soundChannel = settings.music["MainSound"]!!.play(PlaybackTimes.INFINITE) // Turn on music
 
         val button = SolidRect(Size(width, height), settings.colors["Button"]!!) // For screen click
 
@@ -95,7 +98,7 @@ class MainScene : Scene() {
         // Wait user touch
         var userTouch = false
         while(!userTouch) {
-            blinking(textTitles[1], TimeSpan.fromSeconds(1)).awaitComplete() // Blinking animation of text
+            blinking(textTitles[1], 1.seconds).awaitComplete() // Blinking animation of text
             button.onClick {
                 userTouch = true
                 settings.sound["Select"]!!.play() // Turn on sound
@@ -112,12 +115,14 @@ class MainScene : Scene() {
         val text = arrayOf("New game", "Continue", "Violet Rose", "Select hero", "Settings")
         val textSections = Array(text.size) { index ->
             text(text[index]).apply {
-                textSize = 40.0
-                color = if (settings.violetRose != 3 && index == 2)
-                    settings.colors["Unavailable"]!!
-                else
-                    settings.colors["CommonText"]!!
-                font = settings.fonts["Primary"]!!
+                settings.apply {
+                    textSize = textSizes["CommonText"]!!
+                    color = if (violetRose != 3 && index == 2)
+                        colors["Unavailable"]!!
+                    else
+                        colors["CommonText"]!!
+                    font = fonts["Primary"]!!
+                }
                 alpha = .0
             }
         }
@@ -169,12 +174,14 @@ class MainScene : Scene() {
 
     private suspend fun SContainer.sceneSelectHero(header: Text) {
         // Making TextView for section
-        val text = arrayOf("Knight", "Anomaly", "Thief", "Violet Rose", "Back")
+        val text = arrayOf("Knight", "Anomaly", "Thief", "Violet Rose")
         val textSelect = Array(text.size) { index ->
             text(text[index]).apply {
-                textSize = 50.0
-                color = settings.colors["CommonText"]!!
-                font = settings.fonts["Primary"]!!
+                settings.apply {
+                    textSize = textSizes["CommonText"]!!
+                    color = colors["CommonText"]!!
+                    font = fonts["Primary"]!!
+                }
                 alpha = .0
             }
         }
@@ -182,8 +189,10 @@ class MainScene : Scene() {
         // Header of section
         header.apply {
             y = .0
-            textSize = 80.0
-            color = settings.colors["MainText"]!!
+            settings.apply {
+                textSize = textSizes["Header"]!!
+                color = colors["MainText"]!!
+            }
         }.centerXOn(this)
 
         // Pedestals for heroes
@@ -204,6 +213,16 @@ class MainScene : Scene() {
             it.alpha = .0
         }.centerXOn(this)
 
+        // Making text to the button
+        val buttonText = text("Back").apply {
+            settings.apply {
+                textSize = textSizes["CommonText"]!!
+                color = colors["CommonText"]!!
+                font = fonts["Primary"]!!
+            }
+            alpha = .0
+        }
+
         // Location heroes pedestals and TextView
         val stack = uiVerticalStack(padding=20.0) {
             uiHorizontalStack(padding=40.0) {
@@ -222,7 +241,7 @@ class MainScene : Scene() {
         }.centerOn(this)
 
         // Making array of sprites and their location
-        val heroes: Array<Sprite> = Array(4) { index: Int ->
+        val heroSprites: Array<Sprite> = Array(text.size) { index: Int ->
             var parent: Container = this
             settings.run {
                 if (index == this.heroes.size - 1 && violetRose != 3) parent = heroAreas[index]
@@ -241,25 +260,72 @@ class MainScene : Scene() {
             }
         }
 
-        visibleScene(this, header, returnButton, textSelect.last()) // Add views on the scene
-        textSelect.last().centerOn(returnButton) // Add text to the button
+        visibleScene(this, header, returnButton, buttonText) // Add views on the scene
+        buttonText.centerOn(returnButton) // Add text to the button
 
         // Display views
         visibleViews(.8, Easing.EASE_IN, returnButton, *heroAreas)
-        visibleViews(1.0, Easing.EASE_IN, header, *textSelect, *heroes).awaitComplete()
+        visibleViews(1.0, Easing.EASE_IN, header, buttonText, *textSelect, *heroSprites).awaitComplete()
 
         // Animation of heroes
-        for (i in heroes.indices) {
+        for (i in heroSprites.indices) {
             if (settings.selectedHeroes[i])
-                heroes[i].playAnimationLooped(spriteDisplayTime = TimeSpan.fromSeconds(.15))
+                heroSprites[i].playAnimationLooped(spriteDisplayTime = settings.spriteTime[0])
             else
-                heroes[i].playAnimation(spriteDisplayTime = TimeSpan.fromSeconds(.1))
+                heroSprites[i].playAnimation(spriteDisplayTime = settings.spriteTime[4])
+        }
+
+        heroAreas.forEachIndexed { index: Int, heroArea: Circle ->
+            heroArea.onClick {
+                settings.also { st ->
+                    if (!st.selectedHeroes[index])
+                        if (index != 3 || st.violetRose == 3) {
+                            var prevIndex = 0
+                            for (i in st.selectedHeroes.indices)
+                                if (st.selectedHeroes[i]) {
+                                    prevIndex = i
+                                    break
+                                }
+                            st.selectedHeroes[index] = true
+                            st.selectedHeroes[prevIndex] = false
+
+                            st.heroes[text[index]]!!.apply {
+                                death.playAnimation(spriteDisplayTime = st.spriteTime[4], reversed = true)
+                                delay(st.spriteTime[4] * (death.totalFrames - 1))
+                                deathAnimation = true
+                            }
+
+                            heroSprites[index].alpha = .0
+                            heroSprites[prevIndex].alpha = .0
+                            cleanScene(heroSprites[index], heroSprites[prevIndex])
+
+                            heroSprites[index] = st.heroes[text[index]]!!.stand
+                            heroSprites[prevIndex] = st.heroes[text[prevIndex]]!!.death
+
+                            heroSprites[index].also {
+                                it.alpha = 1.0
+                                it.addTo(this).centerOn(heroAreas[index])
+                                it.playAnimationLooped(spriteDisplayTime = st.spriteTime[0])
+                            }
+
+                            heroSprites[prevIndex].also {
+                                it.alpha = 1.0
+                                it.addTo(this).centerOn(heroAreas[prevIndex])
+                                it.playAnimation(spriteDisplayTime = st.spriteTime[0])
+                            }
+                        }
+                }
+            }
         }
 
         returnButton.onClick {
-            visibleViews(.0, Easing.EASE_IN, header, returnButton, *textSelect, *heroAreas, *heroes).awaitComplete() // Vanish views
-            heroes.forEach { hero: Sprite -> hero.playAnimation() } // Stop animation of heroes
-            cleanScene(header, returnButton, stack, *heroes) // Remove views from scene
+            visibleViews(.0, Easing.EASE_IN, header, returnButton, buttonText, *textSelect, *heroAreas, *heroSprites).awaitComplete() // Vanish views
+
+            // Stop animation of heroes
+            heroSprites.forEach { hero: Sprite -> hero.playAnimation() }
+            delay(.5.seconds)
+
+            cleanScene(header, returnButton, buttonText, stack, *heroSprites) // Remove views from scene
             sceneMainButtons() // To main scene
         }
     }
@@ -269,9 +335,11 @@ class MainScene : Scene() {
         val text = arrayOf("Music", "Sound", "Back")
         val textSettings = Array(text.size) { index ->
             text(text[index]).apply {
-                textSize = 40.0
-                color = settings.colors["CommonText"]!!
-                font = settings.fonts["Primary"]!!
+                settings.apply {
+                    textSize = textSizes["CommonText"]!!
+                    color = colors["CommonText"]!!
+                    font = fonts["Primary"]!!
+                }
                 alpha = .0
             }
         }
@@ -279,8 +347,10 @@ class MainScene : Scene() {
         // Header of section
         header.apply {
             y = 0.0
-            textSize = 80.0
-            color = settings.colors["MainText"]!!
+            settings.apply {
+                textSize = textSizes["Header"]!!
+                color = colors["MainText"]!!
+            }
         }.centerXOn(this)
 
         // Button to main scene
