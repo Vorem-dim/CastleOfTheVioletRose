@@ -349,7 +349,7 @@ class MainScene : Scene() {
 
     private suspend fun SContainer.sceneSettings(header: Text) {
         // Making TextView for section
-        val text = arrayOf("Music", "Sound", "Back")
+        val text = arrayOf("Turbo", "Music", "Sound", "Back")
         val textSettings = Array(text.size) { index ->
             text(text[index]).apply {
                 settings.apply {
@@ -382,6 +382,12 @@ class MainScene : Scene() {
 
         // Params of settings section
         val params: Array<View> = arrayOf(
+            RoundRect(Size(.15 * width, 60), RectCorners(30, 15, 15, 30)).apply {
+                settings.also {
+                    alpha = .0
+                    color = if(it.turboMode) it.colors["CommonText"]!! else it.colors["Unavailable"]!!
+                }
+            },
             uiSlider(settings.musicVolume, .0, 1, .1, size = Size(.3 * width, 50)) {
                 showTooltip = false
                 alpha = .0
@@ -415,16 +421,39 @@ class MainScene : Scene() {
             }
         }.centerOn(this)
 
-        visibleScene(this, header, returnButton, textSettings.last()) // Add views on the scene
+        // Making text to button
+        val turboText = text(if(settings.turboMode) "ON" else "OFF").apply {
+            settings.also {
+                textSize = it.textSizes["SmallText"]!!
+                font = it.fonts["Primary"]!!
+                color = if (it.turboMode) it.colors["Slider"]!! else it.colors["CommonText"]!!
+            }
+        }
+
+        visibleScene(this, header, returnButton, textSettings.last(), turboText) // Add views on the scene
         textSettings.last().centerOn(returnButton) // Add text to the button
+        turboText.centerOn(params[0])
 
         // Display views
         visibleViews(.8, Easing.EASE_IN, returnButton)
-        visibleViews(1.0, Easing.EASE_IN, header, *textSettings, *params).awaitComplete()
+        visibleViews(1.0, Easing.EASE_IN, header, turboText, *textSettings, *params).awaitComplete()
+
+        // Change turbo mode
+        params[0].onClick {
+            settings.apply {
+                turboMode = !turboMode
+                params[0].colorMul = if(turboMode) colors["CommonText"]!! else colors["Unavailable"]!!
+                turboText.also {
+                    it.color = if (turboMode) colors["Slider"]!! else colors["CommonText"]!!
+                    it.text = if(turboMode) "ON" else "OFF"
+                }
+                storage["TurboMode"] = turboMode.toString()
+            }
+        }
 
         returnButton.onClick {
-            visibleViews(.0, Easing.EASE_IN, header, returnButton, *textSettings, *params).awaitComplete() // Vanish views
-            cleanScene(stack, header, returnButton, *textSettings) // Remove views from scene
+            visibleViews(.0, Easing.EASE_IN, header, returnButton, turboText, *textSettings, *params).awaitComplete() // Vanish views
+            cleanScene(stack, header, returnButton, turboText, *textSettings) // Remove views from scene
             sceneMainButtons() // To main scene
         }
     }
