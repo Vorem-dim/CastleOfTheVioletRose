@@ -26,7 +26,7 @@ data class Settings(
     // User Settings
     var musicVolume: Double = 1.0,
     var soundVolume: Double = 1.0,
-    var turbo: Boolean = false,
+    var turboMode: Boolean,
     val selectedHeroes: Array<Boolean> = arrayOf(true, false, false, false),
-    var violetRose: Int = 0
+    var violetRose: Int
 )

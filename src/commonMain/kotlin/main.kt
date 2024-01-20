@@ -10,6 +10,7 @@ import korlibs.image.text.*
 import korlibs.io.file.std.*
 import korlibs.korge.animate.*
 import korlibs.korge.input.*
+import korlibs.korge.service.storage.*
 import korlibs.korge.style.*
 import korlibs.korge.ui.*
 import korlibs.korge.view.Circle
@@ -23,11 +24,14 @@ suspend fun main() = Korge {
 }
 
 class MainScene : Scene() {
+    private lateinit var storage: NativeStorage
     private lateinit var soundChannel: SoundChannel
     private lateinit var settings: Settings
     private lateinit var background: Image
 
     override suspend fun SContainer.sceneInit() {
+        storage = views.storage
+
         // Set main parameters
         settings = Settings(
             mapOf(
@@ -45,12 +49,24 @@ class MainScene : Scene() {
                 "Anomaly" to Hero(resourcesVfs["sprites/heroes/anomaly.xml"].readAtlas(), this),
                 "Thief" to Hero(resourcesVfs["sprites/heroes/thief.xml"].readAtlas(), this),
                 "Violet Rose" to Hero(resourcesVfs["sprites/heroes/knight.xml"].readAtlas(), this) // coming soon
-            )
+            ),
+            musicVolume = storage.getOrNull("MusicVolume")?.toDouble() ?: 1.0,
+            soundVolume = storage.getOrNull("SoundVolume")?.toDouble() ?: 1.0,
+            turboMode = storage.getOrNull("TurboMode")?.toBoolean() ?: false,
+            violetRose = storage.getOrNull("VioletRose")?.toInt() ?: 0
         )
 
-        // Set music and sound volume
-        settings.music.values.forEach { music -> music.volume = settings.musicVolume }
-        settings.sound.values.forEach { sound -> sound.volume = settings.soundVolume }
+        // Check and set user params
+        settings.apply {
+            music.values.forEach { music -> music.volume = musicVolume }
+            sound.values.forEach { sound -> sound.volume = soundVolume }
+
+            if (storage.getOrNull("HeroSelection") != null) {
+                val selection: List<Boolean> = storage["HeroSelection"].split(",").map { it.toBoolean() }
+                for (i in selectedHeroes.indices)
+                    selectedHeroes[i] = selection[i]
+            }
+        }
 
         // Set background of menu
         background = image(KR.images.mainScreen.__file.readBitmap()) {
@@ -314,6 +330,7 @@ class MainScene : Scene() {
                                 it.playAnimation(spriteDisplayTime = st.spriteTime[0])
                             }
                         }
+                    storage["HeroSelection"] = st.selectedHeroes.joinToString(separator = ",")
                 }
             }
         }
@@ -356,7 +373,7 @@ class MainScene : Scene() {
         // Button to main scene
         val returnButton = RoundRect(
             Size(.2 * this.width, 60),
-            RectCorners(30,15,15, 30)
+            RectCorners(30,15,15,30)
         ).also {
             it.y = this.height - it.height
             it.color = settings.colors["Button"]!!
@@ -364,32 +381,35 @@ class MainScene : Scene() {
         }.centerXOn(this)
 
         // Params of settings section
-        val params = arrayOf(
-            uiSlider(settings.musicVolume, .0, 1, .1, size=Size(.3 * this.width, 50)) {
+        val params: Array<View> = arrayOf(
+            uiSlider(settings.musicVolume, .0, 1, .1, size = Size(.3 * width, 50)) {
                 showTooltip = false
                 alpha = .0
                 styles { uiSelectedColor = settings.colors["Slider"]!! }
                 changed { volume ->
                     settings.musicVolume = volume
                     soundChannel.volume = volume
+                    storage["MusicVolume"] = volume.toString()
                 }
             },
-            uiSlider(settings.soundVolume, .0, 1, .1, size=Size(.3 * this.width, 50)) {
+            uiSlider(settings.soundVolume, .0, 1, .1, size = Size(.3 * width, 50)) {
                 showTooltip = false
                 alpha = .0
                 styles { uiSelectedColor = settings.colors["Slider"]!! }
                 changed { volume ->
                     settings.soundVolume = volume
                     settings.sound["Select"]!!.volume = volume
+                    storage["SoundVolume"] = volume.toString()
                 }
             }
         )
 
         // Location of params
-        val stack = uiVerticalStack(padding=20.0) {
+        val stack = uiVerticalStack(padding = 40.0) {
             for (i in 0 until textSettings.size - 1) {
-                uiHorizontalStack(padding=10.0) {
+                uiHorizontalStack(padding = 40.0) {
                     visibleScene(this, textSettings[i], params[i])
+                    textSettings[i].centerYOn(this)
                     params[i].centerYOn(this)
                 }
             }
