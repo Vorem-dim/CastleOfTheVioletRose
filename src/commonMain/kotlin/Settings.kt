@@ -8,17 +8,18 @@ data class Settings(
     val fonts: Map<String, Font>,
     val music: Map<String, Sound>,
     val sound: Map<String, Sound>,
+    val currentLevel: Int = 0,
     val textSizes: Map<String, Double> = mapOf(
         "Header" to 80.0,
         "CommonText" to 40.0,
         "SmallText" to 30.0
     ),
     val colors: Map<String, RGBA> = mapOf(
-        "MainText" to RGBA(127, 0, 255),
-        "CommonText" to RGBA(57, 0, 185),
-        "Unavailable" to RGBA(70, 70, 70),
-        "Button" to RGBA(0),
-        "Slider" to RGBA(0, 150, 150)
+        "Violet" to RGBA(127, 0, 255),
+        "DarkViolet" to RGBA(57, 0, 185),
+        "DarkGrey" to RGBA(70, 70, 70),
+        "Black" to RGBA(0),
+        "Cian" to RGBA(0, 150, 150)
     ),
     val heroes: Map<String, Hero>,
     val spriteTime : Array<TimeSpan> = arrayOf(.15.seconds, .15.seconds, .1.seconds, .15.seconds, .1.seconds),

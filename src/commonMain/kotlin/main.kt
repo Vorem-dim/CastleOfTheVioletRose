@@ -83,7 +83,7 @@ class MainScene : Scene() {
             text("Castle of the\nviolet rose").also {
                 settings.apply {
                     it.textSize = textSizes["Header"]!!
-                    it.color = colors["MainText"]!!
+                    it.color = colors["Violet"]!!
                     it.font = fonts["Primary"]!!
                 }
                 it.alignment = TextAlignment.CENTER
@@ -93,7 +93,7 @@ class MainScene : Scene() {
             text("Tap to continue").also {
                 settings.apply {
                     it.textSize = textSizes["SmallText"]!!
-                    it.color = colors["CommonText"]!!
+                    it.color = colors["DarkViolet"]!!
                     it.font = fonts["Secondary"]!!
                 }
                 it.alignment = TextAlignment.CENTER
@@ -103,7 +103,7 @@ class MainScene : Scene() {
         )
         textTitles[1].y = textTitles[0].run { y + height }
 
-        val button = SolidRect(Size(width, height), settings.colors["Button"]!!) // For screen click
+        val button = SolidRect(Size(width, height), settings.colors["Black"]!!) // For screen click
 
         visibleScene(this, button, background, *textTitles) // Add views on the scene
 
@@ -134,9 +134,9 @@ class MainScene : Scene() {
                 settings.apply {
                     textSize = textSizes["CommonText"]!!
                     color = if (violetRose != 3 && index == 2)
-                        colors["Unavailable"]!!
+                        colors["DarkGrey"]!!
                     else
-                        colors["CommonText"]!!
+                        colors["DarkViolet"]!!
                     font = fonts["Primary"]!!
                 }
                 alpha = .0
@@ -150,7 +150,7 @@ class MainScene : Scene() {
                 RectCorners(30,15,15, 30)
             ).also {
                 it.y = (.18 * (index - 2) + .45) * this.height
-                it.color = settings.colors["Button"]!!
+                it.color = settings.colors["Black"]!!
                 it.alpha = .0
             }.centerXOn(this)
         }
@@ -163,12 +163,14 @@ class MainScene : Scene() {
         visibleViews(1.0, Easing.EASE_IN, *textSections)
 
         buttonAreas[0].onClick {
-            visibleViews(.0, Easing.EASE_IN, *textSections, *buttonAreas).awaitComplete() // Vanish views
-            cleanScene(*buttonAreas, *textSections) // Remove views from scene
+            visibleViews(.0, Easing.EASE_IN, background, *textSections, *buttonAreas).awaitComplete() // Vanish views
+            cleanScene(background, *buttonAreas, *textSections) // Remove views from scene
+            sceneContainer.changeTo { LevelInspector(settings) } // Start new game
         }
         buttonAreas[1].onClick {
-            visibleViews(.0, Easing.EASE_IN, *textSections, *buttonAreas).awaitComplete() // Vanish views
-            cleanScene(*buttonAreas, *textSections) // Remove views from scene
+            visibleViews(.0, Easing.EASE_IN, background, *textSections, *buttonAreas).awaitComplete() // Vanish views
+            cleanScene(background, *buttonAreas, *textSections) // Remove views from scene
+            sceneContainer.changeTo { LevelInspector(settings) } // Continue game
         }
         buttonAreas[2].onClick {
             if (settings.violetRose == 3) {
@@ -195,7 +197,7 @@ class MainScene : Scene() {
             text(text[index]).apply {
                 settings.apply {
                     textSize = textSizes["CommonText"]!!
-                    color = colors["CommonText"]!!
+                    color = colors["DarkViolet"]!!
                     font = fonts["Primary"]!!
                 }
                 alpha = .0
@@ -207,14 +209,14 @@ class MainScene : Scene() {
             y = .0
             settings.apply {
                 textSize = textSizes["Header"]!!
-                color = colors["MainText"]!!
+                color = colors["Violet"]!!
             }
         }.centerXOn(this)
 
         // Pedestals for heroes
         val heroAreas = Array(4) {
             Circle(90.0).apply {
-                color = settings.colors["Button"]!!
+                color = settings.colors["Black"]!!
                 alpha = .0
             }
         }
@@ -225,7 +227,7 @@ class MainScene : Scene() {
             RectCorners(30,15,15, 30)
         ).also {
             it.y = this.height - it.height
-            it.color = settings.colors["Button"]!!
+            it.color = settings.colors["Black"]!!
             it.alpha = .0
         }.centerXOn(this)
 
@@ -233,7 +235,7 @@ class MainScene : Scene() {
         val buttonText = text("Back").apply {
             settings.apply {
                 textSize = textSizes["CommonText"]!!
-                color = colors["CommonText"]!!
+                color = colors["DarkViolet"]!!
                 font = fonts["Primary"]!!
             }
             alpha = .0
@@ -354,7 +356,7 @@ class MainScene : Scene() {
             text(text[index]).apply {
                 settings.apply {
                     textSize = textSizes["CommonText"]!!
-                    color = colors["CommonText"]!!
+                    color = colors["DarkViolet"]!!
                     font = fonts["Primary"]!!
                 }
                 alpha = .0
@@ -366,7 +368,7 @@ class MainScene : Scene() {
             y = 0.0
             settings.apply {
                 textSize = textSizes["Header"]!!
-                color = colors["MainText"]!!
+                color = colors["Violet"]!!
             }
         }.centerXOn(this)
 
@@ -376,7 +378,7 @@ class MainScene : Scene() {
             RectCorners(30,15,15,30)
         ).also {
             it.y = this.height - it.height
-            it.color = settings.colors["Button"]!!
+            it.color = settings.colors["Black"]!!
             it.alpha = .0
         }.centerXOn(this)
 
@@ -385,13 +387,13 @@ class MainScene : Scene() {
             RoundRect(Size(.15 * width, 60), RectCorners(30, 15, 15, 30)).apply {
                 settings.also {
                     alpha = .0
-                    color = if(it.turboMode) it.colors["CommonText"]!! else it.colors["Unavailable"]!!
+                    color = if(it.turboMode) it.colors["DarkViolet"]!! else it.colors["DarkGrey"]!!
                 }
             },
             uiSlider(settings.musicVolume, .0, 1, .1, size = Size(.3 * width, 50)) {
                 showTooltip = false
                 alpha = .0
-                styles { uiSelectedColor = settings.colors["Slider"]!! }
+                styles { uiSelectedColor = settings.colors["Cian"]!! }
                 changed { volume ->
                     settings.musicVolume = volume
                     soundChannel.volume = volume
@@ -401,7 +403,7 @@ class MainScene : Scene() {
             uiSlider(settings.soundVolume, .0, 1, .1, size = Size(.3 * width, 50)) {
                 showTooltip = false
                 alpha = .0
-                styles { uiSelectedColor = settings.colors["Slider"]!! }
+                styles { uiSelectedColor = settings.colors["Cian"]!! }
                 changed { volume ->
                     settings.soundVolume = volume
                     settings.sound["Select"]!!.volume = volume
@@ -426,7 +428,7 @@ class MainScene : Scene() {
             settings.also {
                 textSize = it.textSizes["SmallText"]!!
                 font = it.fonts["Primary"]!!
-                color = if (it.turboMode) it.colors["Slider"]!! else it.colors["CommonText"]!!
+                color = if (it.turboMode) it.colors["Cian"]!! else it.colors["DarkViolet"]!!
             }
         }
 
@@ -442,9 +444,9 @@ class MainScene : Scene() {
         params[0].onClick {
             settings.apply {
                 turboMode = !turboMode
-                params[0].colorMul = if(turboMode) colors["CommonText"]!! else colors["Unavailable"]!!
+                params[0].colorMul = if(turboMode) colors["DarkViolet"]!! else colors["DarkGrey"]!!
                 turboText.also {
-                    it.color = if (turboMode) colors["Slider"]!! else colors["CommonText"]!!
+                    it.color = if (turboMode) colors["Cian"]!! else colors["DarkViolet"]!!
                     it.text = if(turboMode) "ON" else "OFF"
                 }
                 storage["TurboMode"] = turboMode.toString()
