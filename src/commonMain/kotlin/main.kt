@@ -45,10 +45,22 @@ class MainScene : Scene() {
                 "Select" to KR.audio.select.__file.readSound()
             ),
             heroes = mapOf(
-                "Knight" to Hero(resourcesVfs["sprites/heroes/knight.xml"].readAtlas(), this),
-                "Anomaly" to Hero(resourcesVfs["sprites/heroes/anomaly.xml"].readAtlas(), this),
-                "Thief" to Hero(resourcesVfs["sprites/heroes/thief.xml"].readAtlas(), this),
-                "Violet Rose" to Hero(resourcesVfs["sprites/heroes/knight.xml"].readAtlas(), this) // coming soon
+                "Knight" to Hero(arrayOf(
+                    resourcesVfs["sprites/heroes/knight.xml"].readAtlas(),
+                    resourcesVfs["sprites/heroes/knight_reversed.xml"].readAtlas()
+                ), this),
+                "Anomaly" to Hero(arrayOf(
+                    resourcesVfs["sprites/heroes/anomaly.xml"].readAtlas(),
+                    resourcesVfs["sprites/heroes/anomaly_reversed.xml"].readAtlas()
+                ), this),
+                "Thief" to Hero(arrayOf(
+                    resourcesVfs["sprites/heroes/thief.xml"].readAtlas(),
+                    resourcesVfs["sprites/heroes/thief_reversed.xml"].readAtlas()
+                ), this),
+                "Violet Rose" to Hero(arrayOf(
+                    resourcesVfs["sprites/heroes/knight.xml"].readAtlas(),
+                    resourcesVfs["sprites/heroes/thief_reversed.xml"].readAtlas()
+                ), this) // coming soon
             ),
             musicVolume = storage.getOrNull("MusicVolume")?.toDouble() ?: 1.0,
             soundVolume = storage.getOrNull("SoundVolume")?.toDouble() ?: 1.0,
@@ -264,13 +276,14 @@ class MainScene : Scene() {
             settings.run {
                 if (index == this.heroes.size - 1 && violetRose != 3) parent = heroAreas[index]
                 this.heroes[text[index]]!!.run {
+                    heroState = setHeroState(if (selectedHeroes[index]) "Stand" else "Death")
                     if (selectedHeroes[index]) {
-                        stand.run {
+                        heroState.run {
                             addTo(parent).centerOn(heroAreas[index])
                             this
                         }
                     } else
-                        death.run {
+                        heroState.run {
                             addTo(parent).centerOn(heroAreas[index])
                             this
                         }
@@ -288,9 +301,9 @@ class MainScene : Scene() {
         // Animation of heroes
         for (i in heroSprites.indices) {
             if (settings.selectedHeroes[i])
-                heroSprites[i].playAnimationLooped(spriteDisplayTime = settings.spriteTime[0])
+                heroSprites[i].playAnimationLooped(spriteDisplayTime = Hero.spriteTime["Stand"]!!)
             else
-                heroSprites[i].playAnimation(spriteDisplayTime = settings.spriteTime[4])
+                heroSprites[i].playAnimation(spriteDisplayTime = Hero.spriteTime["Death"]!!)
         }
 
         heroAreas.forEachIndexed { index: Int, heroArea: Circle ->
@@ -308,8 +321,8 @@ class MainScene : Scene() {
                             st.selectedHeroes[prevIndex] = false
 
                             st.heroes[text[index]]!!.apply {
-                                death.playAnimation(spriteDisplayTime = st.spriteTime[4], reversed = true)
-                                delay(st.spriteTime[4] * (death.totalFrames - 1))
+                                heroState.playAnimation(spriteDisplayTime = Hero.spriteTime["Death"]!!, reversed = true)
+                                delay(Hero.spriteTime["Death"]!! * (heroState.totalFrames - 3))
                                 deathAnimation = true
                             }
 
@@ -317,19 +330,25 @@ class MainScene : Scene() {
                             heroSprites[prevIndex].alpha = .0
                             cleanScene(heroSprites[index], heroSprites[prevIndex])
 
-                            heroSprites[index] = st.heroes[text[index]]!!.stand
-                            heroSprites[prevIndex] = st.heroes[text[prevIndex]]!!.death
+                            heroSprites[index] = with(st.heroes[text[index]]!!) {
+                                heroState = setHeroState("Stand")
+                                heroState
+                            }
+                            heroSprites[prevIndex] = with(st.heroes[text[prevIndex]]!!) {
+                                heroState = setHeroState("Death")
+                                heroState
+                            }
 
                             heroSprites[index].also {
                                 it.alpha = 1.0
                                 it.addTo(this).centerOn(heroAreas[index])
-                                it.playAnimationLooped(spriteDisplayTime = st.spriteTime[0])
+                                it.playAnimationLooped(spriteDisplayTime = Hero.spriteTime["Stand"]!!)
                             }
 
                             heroSprites[prevIndex].also {
                                 it.alpha = 1.0
                                 it.addTo(this).centerOn(heroAreas[prevIndex])
-                                it.playAnimation(spriteDisplayTime = st.spriteTime[0])
+                                it.playAnimation(spriteDisplayTime = Hero.spriteTime["Death"]!!)
                             }
                         }
                     storage["HeroSelection"] = st.selectedHeroes.joinToString(separator = ",")

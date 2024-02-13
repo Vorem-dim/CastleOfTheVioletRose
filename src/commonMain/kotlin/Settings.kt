@@ -22,7 +22,6 @@ data class Settings(
         "Cian" to RGBA(0, 150, 150)
     ),
     val heroes: Map<String, Hero>,
-    val spriteTime : Array<TimeSpan> = arrayOf(.15.seconds, .15.seconds, .1.seconds, .15.seconds, .1.seconds),
 
     // User Settings
     var musicVolume: Double = 1.0,

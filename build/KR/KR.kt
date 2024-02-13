@@ -74,7 +74,10 @@ object __KR {
 	object KRSpritesHeroes {
 		val __file get() = resourcesVfs["sprites/heroes"]
 		@ResourceVfsPath("sprites/heroes/anomaly.png") val `anomaly` get() = TypedVfsFileBitmap(resourcesVfs["sprites/heroes/anomaly.png"])
+		@ResourceVfsPath("sprites/heroes/anomaly_reversed.png") val `anomalyReversed` get() = TypedVfsFileBitmap(resourcesVfs["sprites/heroes/anomaly_reversed.png"])
 		@ResourceVfsPath("sprites/heroes/knight.png") val `knight` get() = TypedVfsFileBitmap(resourcesVfs["sprites/heroes/knight.png"])
+		@ResourceVfsPath("sprites/heroes/knight_reversed.png") val `knightReversed` get() = TypedVfsFileBitmap(resourcesVfs["sprites/heroes/knight_reversed.png"])
 		@ResourceVfsPath("sprites/heroes/thief.png") val `thief` get() = TypedVfsFileBitmap(resourcesVfs["sprites/heroes/thief.png"])
+		@ResourceVfsPath("sprites/heroes/thief_reversed.png") val `thiefReversed` get() = TypedVfsFileBitmap(resourcesVfs["sprites/heroes/thief_reversed.png"])
 	}
 }
