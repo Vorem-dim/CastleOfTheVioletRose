@@ -43,11 +43,11 @@ object __KR {
 	object KRFonts {
 		val __file get() = resourcesVfs["fonts"]
 		@ResourceVfsPath("fonts/primary.ttf") val `primary` get() = TypedVfsFileTTF(resourcesVfs["fonts/primary.ttf"])
-		@ResourceVfsPath("fonts/secondary.ttf") val `secondary` get() = TypedVfsFileTTF(resourcesVfs["fonts/secondary.ttf"])
 	}
 	
 	object KRImages {
 		val __file get() = resourcesVfs["images"]
+		@ResourceVfsPath("images/control") val `control` get() = __KR.KRImagesControl
 		@ResourceVfsPath("images/icon_rose.png") val `iconRose` get() = TypedVfsFileBitmap(resourcesVfs["images/icon_rose.png"])
 		@ResourceVfsPath("images/levels") val `levels` get() = __KR.KRImagesLevels
 		@ResourceVfsPath("images/main_screen.jpg") val `mainScreen` get() = TypedVfsFileBitmap(resourcesVfs["images/main_screen.jpg"])
@@ -57,6 +57,15 @@ object __KR {
 		val __file get() = resourcesVfs["sprites"]
 		@ResourceVfsPath("sprites/bosses") val `bosses` get() = __KR.KRSpritesBosses
 		@ResourceVfsPath("sprites/heroes") val `heroes` get() = __KR.KRSpritesHeroes
+	}
+	
+	object KRImagesControl {
+		val __file get() = resourcesVfs["images/control"]
+		@ResourceVfsPath("images/control/action.png") val `action` get() = TypedVfsFileBitmap(resourcesVfs["images/control/action.png"])
+		@ResourceVfsPath("images/control/arrow_jump.png") val `arrowJump` get() = TypedVfsFileBitmap(resourcesVfs["images/control/arrow_jump.png"])
+		@ResourceVfsPath("images/control/arrow_left.png") val `arrowLeft` get() = TypedVfsFileBitmap(resourcesVfs["images/control/arrow_left.png"])
+		@ResourceVfsPath("images/control/arrow_right.png") val `arrowRight` get() = TypedVfsFileBitmap(resourcesVfs["images/control/arrow_right.png"])
+		@ResourceVfsPath("images/control/sword.png") val `sword` get() = TypedVfsFileBitmap(resourcesVfs["images/control/sword.png"])
 	}
 	
 	object KRImagesLevels {
@@ -69,6 +78,8 @@ object __KR {
 	
 	object KRSpritesBosses {
 		val __file get() = resourcesVfs["sprites/bosses"]
+		@ResourceVfsPath("sprites/bosses/skeleton.png") val `skeleton` get() = TypedVfsFileBitmap(resourcesVfs["sprites/bosses/skeleton.png"])
+		@ResourceVfsPath("sprites/bosses/skeleton_reversed.png") val `skeletonReversed` get() = TypedVfsFileBitmap(resourcesVfs["sprites/bosses/skeleton_reversed.png"])
 	}
 	
 	object KRSpritesHeroes {

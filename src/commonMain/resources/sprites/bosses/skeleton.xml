@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="skeleton.png">
+	<!-- Created using the Spritesheet and XML generator -->
+	<!-- https://uncertainprod.github.io/FNF-Spritesheet-XML-generator-Web -->
+	<SubTexture name="attack0000" x="393" y="0" width="43" height="83" frameX="-20" frameY="2" frameWidth="113" frameHeight="79"/>
+	<SubTexture name="attack0001" x="0" y="0" width="117" height="83" frameX="2" frameY="2" frameWidth="113" frameHeight="79"/>
+	<SubTexture name="attack0002" x="117" y="0" width="67" height="83" frameX="2" frameY="2" frameWidth="113" frameHeight="79"/>
+	<SubTexture name="dead0000" x="50" y="248" width="50" height="69" frameX="-22" frameY="2" frameWidth="70" frameHeight="65"/>
+	<SubTexture name="dead0001" x="102" y="165" width="63" height="67" frameX="-9" frameY="0" frameWidth="70" frameHeight="65"/>
+	<SubTexture name="dead0002" x="165" y="165" width="74" height="33" frameX="2" frameY="-34" frameWidth="70" frameHeight="65"/>
+	<SubTexture name="hurt0000" x="240" y="0" width="56" height="80" frameX="2" frameY="2" frameWidth="52" frameHeight="76"/>
+	<SubTexture name="hurt0001" x="100" y="248" width="49" height="69" frameX="-1" frameY="-9" frameWidth="52" frameHeight="76"/>
+	<SubTexture name="hurt0002" x="296" y="166" width="49" height="70" frameX="-1" frameY="-8" frameWidth="52" frameHeight="76"/>
+	<SubTexture name="idle0000" x="240" y="80" width="56" height="80" frameX="2" frameY="0" frameWidth="52" frameHeight="78"/>
+	<SubTexture name="idle0001" x="112" y="83" width="56" height="82" frameX="2" frameY="2" frameWidth="52" frameHeight="78"/>
+	<SubTexture name="idle0002" x="56" y="83" width="56" height="82" frameX="2" frameY="2" frameWidth="52" frameHeight="78"/>
+	<SubTexture name="idle0003" x="0" y="83" width="56" height="82" frameX="2" frameY="2" frameWidth="52" frameHeight="78"/>
+	<SubTexture name="idle0004" x="184" y="0" width="56" height="82" frameX="2" frameY="2" frameWidth="52" frameHeight="78"/>
+	<SubTexture name="idle0005" x="0" y="83" width="56" height="82" frameX="2" frameY="2" frameWidth="52" frameHeight="78"/>
+	<SubTexture name="idle0006" x="184" y="82" width="55" height="82" frameX="2" frameY="2" frameWidth="51" frameHeight="78"/>
+	<SubTexture name="walk0000" x="51" y="165" width="51" height="83" frameX="2" frameY="2" frameWidth="47" frameHeight="79"/>
+	<SubTexture name="walk0001" x="296" y="83" width="49" height="83" frameX="2" frameY="2" frameWidth="49" frameHeight="79"/>
+	<SubTexture name="walk0002" x="345" y="166" width="48" height="81" frameX="2" frameY="0" frameWidth="49" frameHeight="79"/>
+	<SubTexture name="walk0003" x="345" y="83" width="47" height="83" frameX="2" frameY="2" frameWidth="50" frameHeight="79"/>
+	<SubTexture name="walk0004" x="345" y="0" width="48" height="83" frameX="2" frameY="2" frameWidth="49" frameHeight="79"/>
+	<SubTexture name="walk0005" x="296" y="0" width="49" height="83" frameX="2" frameY="2" frameWidth="50" frameHeight="79"/>
+	<SubTexture name="walk0006" x="0" y="248" width="50" height="81" frameX="2" frameY="0" frameWidth="49" frameHeight="79"/>
+	<SubTexture name="walk0007" x="0" y="165" width="51" height="83" frameX="2" frameY="2" frameWidth="50" frameHeight="79"/>
+</TextureAtlas>
