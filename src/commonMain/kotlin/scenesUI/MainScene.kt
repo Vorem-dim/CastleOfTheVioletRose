@@ -1,12 +1,14 @@
-package scenes
+package scenesUI
 
-import heroes.*
-import Settings
+import model.heroes.*
+import model.Settings
 import korlibs.audio.sound.*
+import korlibs.event.*
 import korlibs.image.atlas.*
 import korlibs.image.font.*
 import korlibs.image.format.*
 import korlibs.image.text.*
+import korlibs.io.async.launch
 import korlibs.io.file.std.*
 import korlibs.korge.animate.*
 import korlibs.korge.input.*
@@ -20,82 +22,80 @@ import korlibs.korge.view.align.*
 import korlibs.math.geom.*
 import korlibs.math.interpolation.*
 import korlibs.time.*
+import viewModel.*
 
 class MainScene : Scene() {
-    private lateinit var storage: NativeStorage
-    private lateinit var soundChannel: SoundChannel
-    private lateinit var settings: Settings
+    private lateinit var settings: SettingsViewModel
     private lateinit var background: Image
 
     override suspend fun SContainer.sceneInit() {
-        storage = views.storage
-
-        // Set main parameters
-        settings = Settings(
-            storage.getOrNull("MusicVolume")?.toDouble() ?: 1.0,
-            storage.getOrNull("SoundVolume")?.toDouble() ?: 1.0,
-            storage.getOrNull("TurboMode")?.toBoolean() ?: false,
-            storage.getOrNull("HeroSelection")?.run { split(",").map { it.toBoolean() }.toMutableList() } ?: mutableListOf(true, false, false, false),
-            storage.getOrNull("VioletRose")?.toInt() ?: 0,
-            mapOf(
-                "Knight" to Knight(
-                    arrayOf(
-                        resourcesVfs["sprites/heroes/knight.xml"].readAtlas(),
-                        resourcesVfs["sprites/heroes/knight_reversed.xml"].readAtlas()
-                    ), this
-                ),
-                "Anomaly" to Anomaly(
-                    arrayOf(
-                        resourcesVfs["sprites/heroes/anomaly.xml"].readAtlas(),
-                        resourcesVfs["sprites/heroes/anomaly_reversed.xml"].readAtlas()
-                    ), this
-                ),
-                "Thief" to Thief(
-                    arrayOf(
-                        resourcesVfs["sprites/heroes/thief.xml"].readAtlas(),
-                        resourcesVfs["sprites/heroes/thief_reversed.xml"].readAtlas()
-                    ), this
-                ),
-                "Violet Rose" to VioletRose(
-                    arrayOf(
-                        resourcesVfs["sprites/heroes/knight.xml"].readAtlas(),
-                        resourcesVfs["sprites/heroes/knight_reversed.xml"].readAtlas()
-                    ), this
-                ) // coming soon
-            ),
-            __KR.KRFonts.primary.__file.readFont(),
-            mapOf(
-                "MainSound" to __KR.KRAudio.mainSound.__file.readSound()
-            ),
-            mapOf(
-                "Select" to __KR.KRAudio.select.__file.readSound()
-            ),
-            storage.getOrNull("CurrentLevel")?.toInt() ?: 0
-        )
-
-        // Set user params
-        settings.apply {
-            music.values.forEach { music -> music.volume = musicVolume }
-            sound.values.forEach { sound -> sound.volume = soundVolume }
+        views.storage.also { nativeStorage ->
+            settings = SettingsViewModel(
+                nativeStorage,
+                Settings(
+                    nativeStorage.getOrNull("MusicVolume")?.toDouble() ?: 1.0,
+                    nativeStorage.getOrNull("SoundVolume")?.toDouble() ?: 1.0,
+                    nativeStorage.getOrNull("getTurbo()")?.toBoolean() ?: false,
+                    nativeStorage.getOrNull("HeroSelection")
+                        ?.run { split(",").map { it.toBoolean() }.toMutableList() }
+                        ?: mutableListOf(true, false, false, false),
+                    nativeStorage.getOrNull("VioletRose")?.toInt() ?: 0,
+                    mapOf(
+                        "Knight" to Knight(
+                            arrayOf(
+                                resourcesVfs["sprites/heroes/knight.xml"].readAtlas(),
+                                resourcesVfs["sprites/heroes/knight_reversed.xml"].readAtlas()
+                            ), this@sceneInit
+                        ),
+                        "Anomaly" to Anomaly(
+                            arrayOf(
+                                resourcesVfs["sprites/heroes/anomaly.xml"].readAtlas(),
+                                resourcesVfs["sprites/heroes/anomaly_reversed.xml"].readAtlas()
+                            ), this@sceneInit
+                        ),
+                        "Thief" to Thief(
+                            arrayOf(
+                                resourcesVfs["sprites/heroes/thief.xml"].readAtlas(),
+                                resourcesVfs["sprites/heroes/thief_reversed.xml"].readAtlas()
+                            ), this@sceneInit
+                        ),
+                        "Violet Rose" to VioletRose(
+                            arrayOf(
+                                resourcesVfs["sprites/heroes/knight.xml"].readAtlas(),
+                                resourcesVfs["sprites/heroes/knight_reversed.xml"].readAtlas()
+                            ), this@sceneInit
+                        )
+                    ),
+                    __KR.KRFonts.primary.__file.readFont(),
+                    mapOf(
+                        "MainSound" to __KR.KRAudio.mainSound.__file.readSound()
+                    ),
+                    mapOf(
+                        "Select" to __KR.KRAudio.select.__file.readSound()
+                    ),
+                    nativeStorage.getOrNull("CurrentLevel")?.toInt() ?: 0
+                )
+            )
         }
-
-        // Set background of menu
-        background = image(__KR.KRImages.mainScreen.__file.readBitmap()) {
-            scale(.7, .8)
-            alpha = .0
-        }.centerOn(this)
     }
 
     override suspend fun SContainer.sceneMain() {
-        soundChannel = settings.music["MainSound"]!!.play(PlaybackTimes.INFINITE) // Turn on music
+        settings.playSound("MainSound", PlaybackTimes.INFINITE)
+
+        // Set background of menu
+        background = image(__KR.KRImages.mainScreen.__file.readBitmap()) {
+            alpha = .0
+            scale(.7, .8)
+            centerOn(this@sceneMain)
+        }
 
         // Making TextView for section
         val textTitles = arrayOf(
             text("Castle of the\nviolet rose").also {
                 settings.apply {
-                    it.textSize = textSizes["Header"]!!
-                    it.color = colors["Violet"]!!
-                    it.font = textFont
+                    it.textSize = getTextSize("Header")
+                    it.color = getColor("Violet")
+                    it.font = getFont()
                 }
                 it.alignment = TextAlignment.CENTER
                 it.alpha = .0
@@ -103,9 +103,9 @@ class MainScene : Scene() {
             },
             text("Tap to continue").also {
                 settings.apply {
-                    it.textSize = textSizes["SmallText"]!!
-                    it.color = colors["DarkViolet"]!!
-                    it.font = textFont
+                    it.textSize = getTextSize("SmallText")
+                    it.color = getColor("DarkViolet")
+                    it.font = getFont()
                 }
                 it.alignment = TextAlignment.CENTER
                 it.alpha = .0
@@ -114,9 +114,7 @@ class MainScene : Scene() {
         )
         textTitles[1].y = textTitles[0].run { y + height }
 
-        val button = SolidRect(Size(width, height), settings.colors["Black"]!!) // For screen click
-
-        visibleScene(this, button, background, *textTitles) // Add views on the scene
+        visibleScene(this, background, *textTitles) // Add views on the scene
 
         // Display views
         visibleViews(1.0, Easing.EASE_IN, background).awaitComplete()
@@ -126,14 +124,16 @@ class MainScene : Scene() {
         var userTouch = false
         while(!userTouch) {
             blinking(textTitles[1], 1.seconds).awaitComplete() // Blinking animation of text
-            button.onClick {
+
+            onEvent(MouseEvent.Type.DOWN) {
                 userTouch = true
-                settings.sound["Select"]!!.play() // Turn on sound
+                launch { settings.playSound("Select") } // Turn on sound
             }
         }
 
         visibleViews(.0, Easing.EASE_IN, *textTitles).awaitComplete() // Vanish views\
         removeChildrenIf { _, child -> child != background }
+        clearEvents()
         sceneMainButtons() // To main scene
     }
 
@@ -142,7 +142,7 @@ class MainScene : Scene() {
         val buttonAreas = Array(5) { index: Int ->
             RoundRect(Size(.3 * width, .1 * height), RectCorners(30,15,15, 30)).apply {
                 y = (.18 * (index - 2) + .45) * this@sceneMainButtons.height
-                color = settings.colors["Black"]!!
+                color = settings.getColor("Black")
                 alpha = .0
                 addTo(this@sceneMainButtons)
                 centerXOn(this@sceneMainButtons)
@@ -154,12 +154,9 @@ class MainScene : Scene() {
         val textSections = Array(5) { index ->
             text(text[index]).apply {
                 settings.apply {
-                    textSize = textSizes["CommonText"]!!
-                    color = if (violetRose != 3 && index == 2)
-                        colors["DarkGrey"]!!
-                    else
-                        colors["DarkViolet"]!!
-                    font = textFont
+                    textSize = getTextSize("CommonText")
+                    color = if (violetRose() != 3 && index == 2) getColor("DarkGrey") else getColor("DarkViolet")
+                    font = getFont()
                     alpha = 0.0
                 }
                 addTo(this@sceneMainButtons)
@@ -182,7 +179,7 @@ class MainScene : Scene() {
 
         buttonAreas[0].onClick {
             cleanScene(true)
-            settings.currentLevel = 0
+            settings.resetCurrentLevel()
             sceneContainer.changeTo { LevelInspector(settings) } // Start new game
         }
         buttonAreas[1].onClick {
@@ -190,13 +187,13 @@ class MainScene : Scene() {
             sceneContainer.changeTo { LevelInspector(settings) } // Continue game
         }
         buttonAreas[2].onClick {
-            if (settings.violetRose == 3) {
+            if (settings.violetRose() == 3) {
                 cleanScene()
             }
         }
         buttonAreas[3].onClick {
             cleanScene()
-            sceneSelectHero(textSections[3]) // To scene of select heroes
+            sceneSelectHero(textSections[3]) // To scene of select model.heroes
         }
         buttonAreas[4].onClick {
             cleanScene()
@@ -210,9 +207,9 @@ class MainScene : Scene() {
         val textSelect = Array(text.size) { index ->
             text(text[index]).apply {
                 settings.apply {
-                    textSize = textSizes["CommonText"]!!
-                    color = colors["DarkViolet"]!!
-                    font = textFont
+                    textSize = getTextSize("CommonText")
+                    color = getColor("DarkViolet")
+                    font = getFont()
                     alpha = .0
                 }
             }
@@ -222,17 +219,17 @@ class MainScene : Scene() {
         header.apply {
             settings.apply {
                 y = .0
-                textSize = textSizes["Header"]!!
-                color = colors["Violet"]!!
+                textSize = getTextSize("Header")
+                color = getColor("Violet")
                 centerXOn(this@sceneSelectHero)
                 addTo(this@sceneSelectHero)
             }
         }
 
-        // Pedestals for heroes
+        // Pedestals for model.heroes
         val heroAreas = Array(4) {
             Circle(90.0).apply {
-                color = settings.colors["Black"]!!
+                color = settings.getColor("Black")
                 alpha = .0
             }
         }
@@ -240,7 +237,7 @@ class MainScene : Scene() {
         // Button to main scene
         val returnButton = RoundRect(Size2D(.2 * width, 60), RectCorners(30,15,15, 30)).apply {
             y = this@sceneSelectHero.height - height
-            color = settings.colors["Black"]!!
+            color = settings.getColor("Black")
             alpha = .0
             addTo(this@sceneSelectHero)
             centerXOn(this@sceneSelectHero)
@@ -249,16 +246,16 @@ class MainScene : Scene() {
         // Making text to the button
         val buttonText = text("Back").apply {
             settings.apply {
-                textSize = textSizes["CommonText"]!!
-                color = colors["DarkViolet"]!!
-                font = textFont
+                textSize = getTextSize("CommonText")
+                color = getColor("DarkViolet")
+                font = getFont()
                 alpha = .0
                 addTo(this@sceneSelectHero)
                 centerOn(returnButton)
             }
         }
 
-        // Location heroes pedestals and TextView
+        // Location model.heroes pedestals and TextView
         uiVerticalStack(padding=20.0) {
             uiHorizontalStack(padding=40.0) {
                 for (i in 0 until heroAreas.size - 1) {
@@ -280,10 +277,10 @@ class MainScene : Scene() {
         val heroSprites: Array<Sprite> = Array(text.size) { index: Int ->
             var parent: Container = this
             settings.run {
-                if (index == heroes.size - 1 && violetRose != 3) parent = heroAreas[index]
-                heroes[text[index]]!!.run {
-                    setHeroState(if (selectedHeroes[index]) "Stand" else "Death")
-                    if (selectedHeroes[index]) {
+                if (index == getHeroes().size - 1 && violetRose() != 3) parent = heroAreas[index]
+                getHero(text[index]).run {
+                    setHeroState(if (getSelectedHeroes()[index]) "Idle" else "Death")
+                    if (getSelectedHeroes()[index]) {
                         getState().run {
                             addTo(parent).centerOn(heroAreas[index])
                             this
@@ -301,31 +298,31 @@ class MainScene : Scene() {
         visibleViews(.8, Easing.EASE_IN, returnButton, *heroAreas)
         visibleViews(1.0, Easing.EASE_IN, header, buttonText, *textSelect, *heroSprites).awaitComplete()
 
-        // Animation of heroes
+        // Animation of model.heroes
         for (i in heroSprites.indices) {
-            if (settings.selectedHeroes[i])
-                heroSprites[i].playAnimationLooped(spriteDisplayTime = Hero.spriteTime["Stand"]!!)
+            if (settings.getSelectedHeroes()[i])
+                heroSprites[i].playAnimationLooped(spriteDisplayTime = Hero.TIME_IDLE)
             else
-                heroSprites[i].playAnimation(spriteDisplayTime = Hero.spriteTime["Death"]!!)
+                heroSprites[i].playAnimation(spriteDisplayTime = Hero.TIME_DEATH)
         }
 
         heroAreas.forEachIndexed { index: Int, heroArea: Circle ->
             heroArea.onClick {
                 settings.apply {
-                    if (!selectedHeroes[index])
-                        if (index != 3 || violetRose == 3) {
+                    if (!getSelectedHeroes()[index])
+                        if (index != 3 || violetRose() == 3) {
                             var prevIndex = 0
-                            for (i in selectedHeroes.indices)
-                                if (selectedHeroes[i]) {
+                            for (i in getSelectedHeroes().indices)
+                                if (getSelectedHeroes()[i]) {
                                     prevIndex = i
                                     break
                                 }
-                            selectedHeroes[index] = true
-                            selectedHeroes[prevIndex] = false
+                            getSelectedHeroes()[index] = true
+                            getSelectedHeroes()[prevIndex] = false
 
-                            heroes[text[index]]!!.apply {
-                                getState().playAnimation(spriteDisplayTime = Hero.spriteTime["Death"]!!, reversed = true)
-                                delay(Hero.spriteTime["Death"]!! * (getState().totalFrames - 3))
+                            getHero(text[index]).apply {
+                                getState().playAnimation(spriteDisplayTime = Hero.TIME_DEATH, reversed = true)
+                                delay(Hero.TIME_DEATH * (getState().totalFrames - 3))
                                 deathAnimation = true
                             }
 
@@ -334,11 +331,11 @@ class MainScene : Scene() {
                             heroSprites[index].removeFromParent()
                             heroSprites[prevIndex].removeFromParent()
 
-                            heroSprites[index] = with(heroes[text[index]]!!) {
-                                setHeroState("Stand")
+                            heroSprites[index] = with(getHero(text[index])) {
+                                setHeroState("Idle")
                                 getState()
                             }
-                            heroSprites[prevIndex] = with(heroes[text[prevIndex]]!!) {
+                            heroSprites[prevIndex] = with(getHero(text[prevIndex])) {
                                 setHeroState("Death")
                                 getState()
                             }
@@ -346,16 +343,16 @@ class MainScene : Scene() {
                             heroSprites[index].apply {
                                 alpha = 1.0
                                 addTo(this@sceneSelectHero).centerOn(heroAreas[index])
-                                playAnimationLooped(spriteDisplayTime = Hero.spriteTime["Stand"]!!)
+                                playAnimationLooped(spriteDisplayTime = Hero.TIME_IDLE)
                             }
 
                             heroSprites[prevIndex].apply {
                                 alpha = 1.0
                                 addTo(this@sceneSelectHero).centerOn(heroAreas[prevIndex])
-                                playAnimation(spriteDisplayTime = Hero.spriteTime["Death"]!!)
+                                playAnimation(spriteDisplayTime = Hero.TIME_DEATH)
                             }
                         }
-                    storage["HeroSelection"] = selectedHeroes.joinToString(separator = ",")
+                    writeStorage("HeroSelection", getSelectedHeroes().joinToString(separator = ","))
                 }
             }
         }
@@ -363,7 +360,7 @@ class MainScene : Scene() {
         returnButton.onClick {
             visibleViews(.0, Easing.EASE_IN, header, returnButton, buttonText, *textSelect, *heroAreas, *heroSprites).awaitComplete() // Vanish views
 
-            // Stop animation of heroes
+            // Stop animation of model.heroes
             heroSprites.forEach { hero: Sprite -> hero.playAnimation() }
             delay(.5.seconds)
 
@@ -378,9 +375,9 @@ class MainScene : Scene() {
         val textSettings = Array(text.size) { index ->
             text(text[index]).apply {
                 settings.apply {
-                    textSize = textSizes["CommonText"]!!
-                    color = colors["DarkViolet"]!!
-                    font = textFont
+                    textSize = getTextSize("CommonText")
+                    color = getColor("DarkViolet")
+                    font = getFont()
                 }
                 alpha = .0
             }
@@ -390,8 +387,8 @@ class MainScene : Scene() {
         header.apply {
             settings.apply {
                 y = .0
-                textSize = textSizes["Header"]!!
-                color = colors["Violet"]!!
+                textSize = getTextSize("Header")
+                color = getColor("Violet")
                 addTo(this@sceneSettings)
                 centerXOn(this@sceneSettings)
             }
@@ -400,7 +397,7 @@ class MainScene : Scene() {
         // Button to main scene
         val returnButton = RoundRect(Size2D(.2 * width, 60), RectCorners(30,15,15,30)).apply {
             y = this@sceneSettings.height - height
-            color = settings.colors["Black"]!!
+            color = settings.getColor("Black")
             alpha = .0
             addTo(this@sceneSettings)
             centerXOn(this@sceneSettings)
@@ -409,9 +406,9 @@ class MainScene : Scene() {
         // Making text to the button
         val buttonText = text("Back").apply {
             settings.apply {
-                textSize = textSizes["CommonText"]!!
-                color = colors["DarkViolet"]!!
-                font = textFont
+                textSize = getTextSize("CommonText")
+                color = getColor("DarkViolet")
+                font = getFont()
                 alpha = .0
                 addTo(this@sceneSettings)
                 centerOn(returnButton)
@@ -423,27 +420,29 @@ class MainScene : Scene() {
             RoundRect(Size2D(.15 * width, 60), RectCorners(30, 15, 15, 30)).apply {
                 settings.apply {
                     alpha = .0
-                    color = if(turboMode) colors["DarkViolet"]!! else colors["DarkGrey"]!!
+                    color = if(getTurbo()) getColor("DarkViolet") else getColor("DarkGrey")
                 }
             },
-            uiSlider(settings.musicVolume, .0, 1, .1, size = Size2D(.3 * width, 50)) {
+            uiSlider(settings.getMusicVolume(), .0, 1, .1, size = Size2D(.3 * width, 50)) {
                 showTooltip = false
                 alpha = .0
-                styles { uiSelectedColor = settings.colors["Cian"]!! }
+                styles { uiSelectedColor = settings.getColor("Cian") }
                 changed { volume ->
-                    settings.musicVolume = volume
-                    soundChannel.volume = volume
-                    storage["MusicVolume"] = volume.toString()
+                    settings.apply {
+                        setMusicVolume("MainSound", volume)
+                        writeStorage("MusicVolume", volume.toString())
+                    }
                 }
             },
-            uiSlider(settings.soundVolume, .0, 1, .1, size = Size2D(.3 * width, 50)) {
+            uiSlider(settings.getSoundVolume(), .0, 1, .1, size = Size2D(.3 * width, 50)) {
                 showTooltip = false
                 alpha = .0
-                styles { uiSelectedColor = settings.colors["Cian"]!! }
+                styles { uiSelectedColor = settings.getColor("Cian") }
                 changed { volume ->
-                    settings.soundVolume = volume
-                    settings.sound["Select"]!!.volume = volume
-                    storage["SoundVolume"] = volume.toString()
+                    settings.apply {
+                        setSoundVolume("Select", volume)
+                        writeStorage("SoundVolume", volume.toString())
+                    }
                 }
             }
         )
@@ -460,11 +459,11 @@ class MainScene : Scene() {
         }.centerOn(this)
 
         // Making text to button
-        val turboText = text(if(settings.turboMode) "ON" else "OFF").apply {
+        val turboText = text(if(settings.getTurbo()) "ON" else "OFF").apply {
             settings.apply {
-                textSize = textSizes["SmallText"]!!
-                font = textFont
-                color = if (turboMode) colors["Cian"]!! else colors["DarkViolet"]!!
+                textSize = getTextSize("SmallText")
+                font = getFont()
+                color = if (getTurbo()) getColor("Cian") else getColor("DarkViolet")
                 addTo(this@sceneSettings)
                 centerOn(params[0])
             }
@@ -477,13 +476,13 @@ class MainScene : Scene() {
         // Change turbo mode
         params[0].onClick {
             settings.apply {
-                turboMode = !turboMode
-                params[0].colorMul = if(turboMode) colors["DarkViolet"]!! else colors["DarkGrey"]!!
+                setTurbo()
+                params[0].colorMul = if(getTurbo()) getColor("DarkViolet") else getColor("DarkGrey")
                 turboText.also {
-                    it.color = if (turboMode) colors["Cian"]!! else colors["DarkViolet"]!!
-                    it.text = if(turboMode) "ON" else "OFF"
+                    it.color = if (getTurbo()) getColor("Cian") else getColor("DarkViolet")
+                    it.text = if(getTurbo()) "ON" else "OFF"
                 }
-                storage["TurboMode"] = turboMode.toString()
+                writeStorage("TurboMode", getTurbo().toString())
             }
         }
 

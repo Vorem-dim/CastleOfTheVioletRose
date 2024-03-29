@@ -1,10 +1,12 @@
-import heroes.Hero
+package model
+
+import model.heroes.Hero
 import korlibs.audio.sound.*
 import korlibs.image.color.*
 import korlibs.image.font.*
 
 data class Settings(
-    // User Settings
+    // User model.Settings
     var musicVolume: Double,
     var soundVolume: Double,
     var turboMode: Boolean,

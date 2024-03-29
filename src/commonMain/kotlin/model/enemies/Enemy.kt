@@ -1,3 +1,5 @@
+package model.enemies
+
 import korlibs.image.atlas.*
 import korlibs.korge.box2d.*
 import korlibs.korge.view.*
@@ -10,13 +12,11 @@ class Enemy(atlas: Array<Atlas>, container: Container) {
     private var stateIndex: Int = 1
 
     companion object {
-        val spriteTime : Map<String, TimeSpan> = mapOf(
-            "Idle" to .15.seconds,
-            "Run" to .15.seconds,
-            "Hit" to .2.seconds,
-            "Death" to .2.seconds,
-            "Attack" to .2.seconds
-        )
+        val TIME_ATTACK: TimeSpan = .2.seconds
+        val TIME_DEATH: TimeSpan = .2.seconds
+        val TIME_IDLE: TimeSpan = .15.seconds
+        val TIME_WALK: TimeSpan = .15.seconds
+        val TIME_HIT: TimeSpan = .2.seconds
     }
 
     init {
@@ -25,9 +25,9 @@ class Enemy(atlas: Array<Atlas>, container: Container) {
                 enemyStates.addAll(arrayOf(
                     container.sprite(getSpriteAnimation("attack")).apply { removeFromParent() },
                     container.sprite(getSpriteAnimation("idle")).apply { removeFromParent() },
-                    container.sprite(getSpriteAnimation("hurt")).apply { removeFromParent() },
+                    container.sprite(getSpriteAnimation("hit")).apply { removeFromParent() },
                     container.sprite(getSpriteAnimation("walk")).apply { removeFromParent() },
-                    container.sprite(getSpriteAnimation("dead")).apply {
+                    container.sprite(getSpriteAnimation("death")).apply {
                         removeFromParent()
                         onFrameChanged {
                             if (currentSpriteIndex == totalFrames - 1) {
@@ -40,11 +40,20 @@ class Enemy(atlas: Array<Atlas>, container: Container) {
         }
     }
 
+    private fun getEnemyTime(state: String): TimeSpan = when(state) {
+        "Attack" -> TIME_ATTACK
+        "Death" -> TIME_DEATH
+        "Idle" -> TIME_IDLE
+        "Run" -> TIME_WALK
+        "Hit" -> TIME_HIT
+        else -> TIME_IDLE
+    }
+
     private fun getEnemyState(state: String): Int = when(state) {
         "Attack" -> { if (spriteReversed) 5 else 0 }
-        "Stand" -> { if (spriteReversed) 6 else 1 }
+        "Idle" -> { if (spriteReversed) 6 else 1 }
         "Hit" -> { if (spriteReversed) 7 else 2 }
-        "Run" -> { if (spriteReversed) 8 else 3 }
+        "Walk" -> { if (spriteReversed) 8 else 3 }
         "Death" -> { if (spriteReversed) 9 else 4 }
         else -> 1
     }
@@ -69,13 +78,13 @@ class Enemy(atlas: Array<Atlas>, container: Container) {
                 gravityScale = 4,
                 type = BodyType.DYNAMIC,
                 friction = 1.0,
-                fixedRotation = state == "Jump" || state == "Fall"
+                fixedRotation = true
             )
             pos = enemyStates[prevIndex].pos
             rotation = enemyStates[prevIndex].rotation
-            playAnimationLooped(spriteDisplayTime = Enemy.spriteTime[state]!!, startFrame = startFrame)
+            playAnimationLooped(spriteDisplayTime = getEnemyTime(state), startFrame = startFrame)
         }
     }
 
-    fun getEnemyState() = enemyStates[stateIndex]
+    fun getState() = enemyStates[stateIndex]
 }

@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TextureAtlas imagePath="knight_reversed.png">
-	<!-- Created using the Spritesheet and XML generator -->
-	<!-- https://uncertainprod.github.io/FNF-Spritesheet-XML-generator-Web -->
 	<SubTexture name="attack0000" x="69" y="404" width="69" height="83" frameX="-67" frameY="2" frameWidth="178" frameHeight="79"/>
 	<SubTexture name="attack0001" x="0" y="404" width="69" height="83" frameX="-72" frameY="2" frameWidth="178" frameHeight="79"/>
 	<SubTexture name="attack0002" x="435" y="83" width="72" height="83" frameX="-68" frameY="2" frameWidth="178" frameHeight="79"/>
@@ -33,11 +31,11 @@
 	<SubTexture name="run0004" x="342" y="404" width="69" height="78" frameX="-1" frameY="-2" frameWidth="75" frameHeight="81"/>
 	<SubTexture name="run0005" x="411" y="404" width="68" height="77" frameX="2" frameY="2" frameWidth="75" frameHeight="81"/>
 	<SubTexture name="run0006" x="138" y="404" width="68" height="81" frameX="-6" frameY="-2" frameWidth="75" frameHeight="81"/>
-	<SubTexture name="stand0000" x="508" y="0" width="66" height="84" frameX="2" frameY="-2" frameWidth="62" frameHeight="84"/>
-	<SubTexture name="stand0001" x="435" y="254" width="66" height="88" frameX="2" frameY="2" frameWidth="62" frameHeight="84"/>
-	<SubTexture name="stand0002" x="435" y="166" width="66" height="88" frameX="2" frameY="2" frameWidth="62" frameHeight="84"/>
-	<SubTexture name="stand0003" x="508" y="84" width="66" height="84" frameX="2" frameY="-2" frameWidth="62" frameHeight="84"/>
-	<SubTexture name="stand0004" x="508" y="168" width="66" height="84" frameX="2" frameY="-2" frameWidth="62" frameHeight="84"/>
-	<SubTexture name="stand0005" x="508" y="332" width="66" height="80" frameX="2" frameY="-6" frameWidth="62" frameHeight="84"/>
-	<SubTexture name="stand0006" x="508" y="252" width="66" height="80" frameX="2" frameY="-6" frameWidth="62" frameHeight="84"/>
+	<SubTexture name="idle0000" x="508" y="0" width="66" height="84" frameX="2" frameY="-2" frameWidth="62" frameHeight="84"/>
+	<SubTexture name="idle0001" x="435" y="254" width="66" height="88" frameX="2" frameY="2" frameWidth="62" frameHeight="84"/>
+	<SubTexture name="idle0002" x="435" y="166" width="66" height="88" frameX="2" frameY="2" frameWidth="62" frameHeight="84"/>
+	<SubTexture name="idle0003" x="508" y="84" width="66" height="84" frameX="2" frameY="-2" frameWidth="62" frameHeight="84"/>
+	<SubTexture name="idle0004" x="508" y="168" width="66" height="84" frameX="2" frameY="-2" frameWidth="62" frameHeight="84"/>
+	<SubTexture name="idle0005" x="508" y="332" width="66" height="80" frameX="2" frameY="-6" frameWidth="62" frameHeight="84"/>
+	<SubTexture name="idle0006" x="508" y="252" width="66" height="80" frameX="2" frameY="-6" frameWidth="62" frameHeight="84"/>
 </TextureAtlas>

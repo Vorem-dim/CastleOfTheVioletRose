@@ -1,3 +1,5 @@
+package model
+
 import korlibs.event.*
 import korlibs.image.color.*
 import korlibs.image.format.*
@@ -18,11 +20,11 @@ class Controller {
     suspend fun controlPanelCreate(container: Container) {
         buttonImages = with(container) {
             arrayOf(
-                image(KR.images.control.arrowLeft.__file.readBitmap()),
-                image(KR.images.control.arrowRight.__file.readBitmap()),
-                image(KR.images.control.arrowJump.__file.readBitmap()),
-                image(KR.images.control.sword.__file.readBitmap()),
-                image(KR.images.control.action.__file.readBitmap())
+                image(__KR.KRImagesControl.arrowLeft.__file.readBitmap()).apply { removeFromParent() },
+                image(__KR.KRImagesControl.arrowRight.__file.readBitmap()).apply { removeFromParent() },
+                image(__KR.KRImagesControl.arrowJump.__file.readBitmap()).apply { removeFromParent() },
+                image(__KR.KRImagesControl.sword.__file.readBitmap()).apply { removeFromParent() },
+                image(__KR.KRImagesControl.action.__file.readBitmap()).apply { removeFromParent() }
             )
         }
 
@@ -43,6 +45,7 @@ class Controller {
             buttonImages[i].apply {
                 scale = .125
                 zIndex = 11.0
+                addTo(container)
                 centerOn(buttonAreas[i])
             }
         }
@@ -69,17 +72,17 @@ class Controller {
         }
 
         val event = if (buttonStates[4])
-            HeroEvent.Action
+            HeroEvent.ACTION
         else if (buttonStates[3])
-            HeroEvent.Attack
+            HeroEvent.ATTACK
         else if (buttonStates[2])
-            HeroEvent.Jump
+            HeroEvent.JUMP
         else if (buttonStates[1])
-            HeroEvent.Right
+            HeroEvent.MOVE_RIGHT
         else if (buttonStates[0])
-            HeroEvent.Left
+            HeroEvent.MOVE_LEFT
         else
-            HeroEvent.Idle
+            HeroEvent.IDLE
 
         for (i in buttonStates.indices)
             buttonStates[i] = false

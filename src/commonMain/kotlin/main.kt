@@ -1,4 +1,4 @@
-import scenes.*
+import scenesUI.*
 import korlibs.korge.*
 import korlibs.korge.scene.*
 

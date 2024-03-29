@@ -1,9 +1,9 @@
-package heroes
+package model.heroes
 
 import korlibs.image.atlas.*
 import korlibs.korge.view.*
 
-class Knight(atlas: Array<Atlas>, container: Container): Hero(atlas, container) {
+class VioletRose(atlas: Array<Atlas>, container: Container): Hero(atlas, container) {
     init {
         atlas.forEach {
             it.apply {

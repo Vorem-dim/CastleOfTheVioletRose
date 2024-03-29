@@ -1,4 +1,4 @@
-package heroes
+package model.heroes
 
 import korlibs.image.atlas.*
 import korlibs.korge.view.*

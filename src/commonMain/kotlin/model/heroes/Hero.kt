@@ -1,35 +1,28 @@
-package heroes
+package model.heroes
 
-import HeroEvent
 import korlibs.image.atlas.*
-import korlibs.io.async.*
 import korlibs.korge.box2d.*
 import korlibs.korge.view.*
 import korlibs.math.geom.*
-import korlibs.math.range.*
 import korlibs.time.*
-import kotlinx.coroutines.*
 import org.jbox2d.dynamics.*
-import kotlin.coroutines.*
 
 open class Hero(atlas: Array<Atlas>, container: Container) {
+    var spriteReversed: Boolean = false
     var deathAnimation: Boolean = true
     var inMidAir: Boolean = false
     var isFall: Boolean = false
     protected val heroStates: MutableList<Sprite> = mutableListOf()
-    var spriteReversed: Boolean = false
     private var stateIndex: Int = 1
 
     companion object {
-        val spriteTime : Map<String, TimeSpan> = mapOf(
-            "Stand" to .15.seconds,
-            "Run" to .15.seconds,
-            "Hit" to .15.seconds,
-            "Death" to .1.seconds,
-            "Attack" to .1.seconds,
-            "Jump" to .1.seconds,
-            "Fall" to .1.seconds
-        )
+        val TIME_ATTACK: TimeSpan = .1.seconds
+        val TIME_DEATH: TimeSpan = .1.seconds
+        val TIME_JUMP: TimeSpan = .1.seconds
+        val TIME_FALL: TimeSpan = .1.seconds
+        val TIME_IDLE: TimeSpan = .15.seconds
+        val TIME_RUN: TimeSpan = .15.seconds
+        val TIME_HIT: TimeSpan = .15.seconds
     }
 
     init {
@@ -37,7 +30,7 @@ open class Hero(atlas: Array<Atlas>, container: Container) {
             it.apply {
                 heroStates.addAll(arrayOf(
                     container.sprite(getSpriteAnimation("attack")).apply { removeFromParent() },
-                    container.sprite(getSpriteAnimation("stand")).apply { removeFromParent() },
+                    container.sprite(getSpriteAnimation("idle")).apply { removeFromParent() },
                     container.sprite(getSpriteAnimation("hit")).apply { removeFromParent() },
                     container.sprite(getSpriteAnimation("run")).apply { removeFromParent() },
                     container.sprite(getSpriteAnimation("death")).apply {
@@ -56,9 +49,20 @@ open class Hero(atlas: Array<Atlas>, container: Container) {
         heroStates[4].alpha = .0
     }
 
+    private fun getHeroTime(state: String): TimeSpan = when(state) {
+        "Attack" -> TIME_ATTACK
+        "Death" -> TIME_DEATH
+        "Jump" -> TIME_JUMP
+        "Fall" -> TIME_FALL
+        "Idle" -> TIME_IDLE
+        "Run" -> TIME_RUN
+        "Hit" -> TIME_HIT
+        else -> TIME_IDLE
+    }
+
     private fun getHeroState(state: String): Int = when(state) {
         "Attack" -> { if (spriteReversed) 5 else 0 }
-        "Stand" -> { if (spriteReversed) 6 else 1 }
+        "Idle" -> { if (spriteReversed) 6 else 1 }
         "Hit" -> { if (spriteReversed) 7 else 2 }
         "Run" -> { if (spriteReversed) 8 else 3 }
         "Death" -> { if (spriteReversed) 9 else 4 }
@@ -91,7 +95,7 @@ open class Hero(atlas: Array<Atlas>, container: Container) {
             )
             pos = heroStates[prevIndex].pos
             rotation = if (state == "Jump" || state == "Fall") Angle.Companion.fromDegrees(0) else heroStates[prevIndex].rotation
-            playAnimationLooped(spriteDisplayTime = spriteTime[state]!!, startFrame = startFrame)
+            playAnimationLooped(spriteDisplayTime = getHeroTime(state), startFrame = startFrame)
         }
     }
 

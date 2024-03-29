@@ -10,13 +10,13 @@
 	<SubTexture name="death0003" x="435" y="342" width="59" height="61" frameX="-1" frameY="-19" frameWidth="61" frameHeight="78"/>
 	<SubTexture name="death0004" x="349" y="265" width="65" height="47" frameX="2" frameY="-33" frameWidth="61" frameHeight="78"/>
 	<SubTexture name="death0005" x="226" y="163" width="65" height="43" frameX="2" frameY="-37" frameWidth="61" frameHeight="78"/>
-	<SubTexture name="stand0000" x="508" y="84" width="66" height="84" frameX="2" frameY="-2" frameWidth="62" frameHeight="84"/>
-	<SubTexture name="stand0001" x="435" y="166" width="66" height="88" frameX="2" frameY="2" frameWidth="62" frameHeight="84"/>
-	<SubTexture name="stand0002" x="435" y="254" width="66" height="88" frameX="2" frameY="2" frameWidth="62" frameHeight="84"/>
-	<SubTexture name="stand0003" x="508" y="0" width="66" height="84" frameX="2" frameY="-2" frameWidth="62" frameHeight="84"/>
-	<SubTexture name="stand0004" x="508" y="168" width="66" height="84" frameX="2" frameY="-2" frameWidth="62" frameHeight="84"/>
-	<SubTexture name="stand0005" x="508" y="252" width="66" height="80" frameX="2" frameY="-6" frameWidth="62" frameHeight="84"/>
-	<SubTexture name="stand0006" x="508" y="332" width="66" height="80" frameX="2" frameY="-6" frameWidth="62" frameHeight="84"/>
+	<SubTexture name="idle0000" x="508" y="84" width="66" height="84" frameX="2" frameY="-2" frameWidth="62" frameHeight="84"/>
+	<SubTexture name="idle0001" x="435" y="166" width="66" height="88" frameX="2" frameY="2" frameWidth="62" frameHeight="84"/>
+	<SubTexture name="idle0002" x="435" y="254" width="66" height="88" frameX="2" frameY="2" frameWidth="62" frameHeight="84"/>
+	<SubTexture name="idle0003" x="508" y="0" width="66" height="84" frameX="2" frameY="-2" frameWidth="62" frameHeight="84"/>
+	<SubTexture name="idle0004" x="508" y="168" width="66" height="84" frameX="2" frameY="-2" frameWidth="62" frameHeight="84"/>
+	<SubTexture name="idle0005" x="508" y="252" width="66" height="80" frameX="2" frameY="-6" frameWidth="62" frameHeight="84"/>
+	<SubTexture name="idle0006" x="508" y="332" width="66" height="80" frameX="2" frameY="-6" frameWidth="62" frameHeight="84"/>
 	<SubTexture name="run0000" x="228" y="238" width="76" height="78" frameX="2" frameY="-2" frameWidth="75" frameHeight="81"/>
 	<SubTexture name="run0001" x="154" y="321" width="76" height="77" frameX="2" frameY="2" frameWidth="75" frameHeight="81"/>
 	<SubTexture name="run0002" x="78" y="321" width="76" height="82" frameX="2" frameY="2" frameWidth="75" frameHeight="81"/>
