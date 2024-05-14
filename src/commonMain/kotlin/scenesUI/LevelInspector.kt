@@ -104,24 +104,9 @@ class LevelInspector(settings: SettingsViewModel): Scene() {
                 }
             }
 
-//            enemies[screenIndex].forEach { enemy ->
-//                val enemyPos = enemy.getState().run { (x + width) / 2 }
-//                val heroPos = hero.getState().run { (x + width) / 2 }
-//                if (enemy.getState().collidesWith(hero.getState())) {
-//                    enemy.changeState(this@level0, "Attack")
-//                }
-//                else if (enemyPos + 200 > heroPos && enemyPos < heroPos) {
-//                    enemy.changeState(this@level0, "Walk", "Right")
-//                    if (!enemy.spriteReversed) enemy.getState().body?.linearVelocityX = 5f
-//                }
-//                else if (enemyPos - 200 < heroPos && enemyPos > heroPos) {
-//                    enemy.changeState(this@level0, "Walk", "Left")
-//                    if (!enemy.spriteReversed) enemy.getState().body?.linearVelocityX = -5f
-//                }
-//                else {
-//                    enemy.changeState(this@level0, "Idle")
-//                }
-//            }
+            launch {
+                levelViewModel.enemyAI(this@level0, screenIndex)
+            }
         }
     }
 

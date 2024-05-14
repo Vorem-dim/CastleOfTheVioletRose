@@ -29,11 +29,11 @@ open class Hero(atlas: Array<Atlas>, container: Container) {
         atlas.forEach {
             it.apply {
                 heroStates.addAll(arrayOf(
-                    container.sprite(getSpriteAnimation("attack")).apply { removeFromParent() },
-                    container.sprite(getSpriteAnimation("idle")).apply { removeFromParent() },
-                    container.sprite(getSpriteAnimation("hit")).apply { removeFromParent() },
-                    container.sprite(getSpriteAnimation("run")).apply { removeFromParent() },
-                    container.sprite(getSpriteAnimation("death")).apply {
+                    container.sprite(getSpriteAnimation("attack"), Anchor.CENTER).apply { removeFromParent() },
+                    container.sprite(getSpriteAnimation("idle"), Anchor.CENTER).apply { removeFromParent() },
+                    container.sprite(getSpriteAnimation("hit"), Anchor.CENTER).apply { removeFromParent() },
+                    container.sprite(getSpriteAnimation("run"), Anchor.CENTER).apply { removeFromParent() },
+                    container.sprite(getSpriteAnimation("death"), Anchor.CENTER).apply {
                         removeFromParent()
                         onFrameChanged {
                             if (currentSpriteIndex == totalFrames - 1) {

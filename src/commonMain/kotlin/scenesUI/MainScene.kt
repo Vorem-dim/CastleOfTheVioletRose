@@ -131,7 +131,7 @@ class MainScene : Scene() {
             }
         }
 
-        visibleViews(.0, Easing.EASE_IN, *textTitles).awaitComplete() // Vanish views\
+        visibleViews(.0, Easing.EASE_IN, *textTitles).awaitComplete() // Vanish views
         removeChildrenIf { _, child -> child != background }
         clearEvents()
         sceneMainButtons() // To main scene

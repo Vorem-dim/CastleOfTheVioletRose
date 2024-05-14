@@ -5,6 +5,7 @@ import korlibs.image.atlas.*
 import korlibs.io.file.std.*
 import korlibs.korge.box2d.*
 import korlibs.korge.view.*
+import korlibs.korge.view.collision.*
 import korlibs.math.geom.*
 import kotlinx.coroutines.*
 import model.*
@@ -142,6 +143,35 @@ class LevelViewModel(private val settings: SettingsViewModel) {
             position(heroPos.x, heroPos.y - height)
             rotation(Angle.fromDegrees(0))
             addTo(container)
+        }
+    }
+
+    fun enemyAI(container: Container, location: Int) {
+        if (location != 0)
+            return
+
+        locationEnemies[location].forEach { enemy: Enemy ->
+            if (enemy.getState().collidesWith(hero.getState()))
+                enemy.changeState(container, "Attack")
+            else {
+                val enemyPos = enemy.getState().run { (x + width) / 2 }
+                val heroPos = hero.getState().run { (x + width) / 2 }
+
+                if (enemyPos + 200 > heroPos && enemyPos < heroPos) {
+                    enemy.apply {
+                        changeState(container, "Walk", "Right")
+                        getState().body?.linearVelocityX = 5f
+                    }
+                }
+                else if (enemyPos - 200 < heroPos && enemyPos > heroPos) {
+                    enemy.apply {
+                        changeState(container, "Walk", "Left")
+                        getState().body?.linearVelocityX = -5f
+                    }
+                }
+                else
+                    enemy.changeState(container, "Idle")
+            }
         }
     }
 }
