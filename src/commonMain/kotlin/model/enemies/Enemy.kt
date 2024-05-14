@@ -3,6 +3,7 @@ package model.enemies
 import korlibs.image.atlas.*
 import korlibs.korge.box2d.*
 import korlibs.korge.view.*
+import korlibs.math.geom.*
 import korlibs.time.*
 import org.jbox2d.dynamics.*
 
@@ -80,8 +81,10 @@ class Enemy(atlas: Array<Atlas>, container: Container) {
                 friction = 1.0,
                 fixedRotation = true
             )
-            pos = enemyStates[prevIndex].pos
-            rotation = enemyStates[prevIndex].rotation
+            enemyStates[prevIndex].also {
+                pos = it.pos
+                rotation = it.rotation
+            }
             playAnimationLooped(spriteDisplayTime = getEnemyTime(state), startFrame = startFrame)
         }
     }

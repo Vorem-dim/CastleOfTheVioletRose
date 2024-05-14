@@ -71,6 +71,17 @@ class LevelInspector(settings: SettingsViewModel): Scene() {
             arrayOf(
                 mapOf("skeleton" to Point(500, y)),
                 mapOf("skeleton" to Point(800, y))
+            ),
+            arrayOf(
+                mapOf("skeleton" to Point(900, y - 20))
+            ),
+            arrayOf(
+                mapOf("skeleton" to Point(200, y)),
+                mapOf("skeleton" to Point(500, y))
+            ),
+            arrayOf(
+                mapOf("skeleton" to Point(300, y)),
+                mapOf("skeleton" to Point(900, y))
             )
         )
 
@@ -85,7 +96,7 @@ class LevelInspector(settings: SettingsViewModel): Scene() {
                         borders[screenIndex].forEach { border: SolidRect ->
                             border.apply { addTo(this@level0); registerBodyWithFixture() }
                         }
-                        levelViewModel.heroToNewLocation(this@level0, Point(0, borders[screenIndex][0].y))
+                        levelViewModel.heroToNewLocation(this@level0, borders[screenIndex][0], "Forward", screenIndex)
                     }
                     "Previous" -> {
                         if (screenIndex == 0) return@launch
@@ -95,10 +106,11 @@ class LevelInspector(settings: SettingsViewModel): Scene() {
                         borders[screenIndex].forEach { border: SolidRect ->
                             border.apply { addTo(this@level0); registerBodyWithFixture() }
                         }
-                        val border = borders[screenIndex].last()
                         levelViewModel.heroToNewLocation(
                             this@level0,
-                            Point(border.run { x + width } - width, border.y)
+                            borders[screenIndex].last(),
+                            "Back",
+                            screenIndex
                         )
                     }
                 }
@@ -106,6 +118,7 @@ class LevelInspector(settings: SettingsViewModel): Scene() {
 
             launch {
                 levelViewModel.enemyAI(this@level0, screenIndex)
+                levelViewModel.hitEnemy()
             }
         }
     }

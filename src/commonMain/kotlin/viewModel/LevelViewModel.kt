@@ -7,16 +7,18 @@ import korlibs.korge.box2d.*
 import korlibs.korge.view.*
 import korlibs.korge.view.collision.*
 import korlibs.math.geom.*
+import korlibs.math.geom.abs
 import kotlinx.coroutines.*
 import model.*
 import model.enemies.*
 import model.heroes.*
 import org.jbox2d.dynamics.*
+import kotlin.math.*
 
 class LevelViewModel(private val settings: SettingsViewModel) {
     private val controller = Controller()
     private lateinit var hero: Hero
-    private lateinit var locationEnemies: Array<Array<Enemy>>
+    private lateinit var locationEnemies: Array<Array<Enemy?>>
 
     suspend fun startGame(container: Container): Int {
         for (i in settings.getSelectedHeroes().indices)
@@ -137,40 +139,64 @@ class LevelViewModel(private val settings: SettingsViewModel) {
         return changeFrame
     }
 
-    fun heroToNewLocation(container: Container, heroPos: Point) {
+    fun heroToNewLocation(container: Container, border: SolidRect, flag: String, location: Int) {
         hero.getState().apply {
+            val point: Point = if (flag == "Back")
+                Point(border.run { x + width } - hero.getState().width, border.y)
+            else
+                Point(0, border.y)
+
             removeFromParent()
-            position(heroPos.x, heroPos.y - height)
+            position(point.x, point.y - height)
             rotation(Angle.fromDegrees(0))
             addTo(container)
+        }
+        locationEnemies[location].forEach { enemy ->
+            enemy?.apply {
+                getState().addTo(container)
+                changeState(container, "Idle")
+            }
         }
     }
 
     fun enemyAI(container: Container, location: Int) {
-        if (location != 0)
-            return
+        locationEnemies[location].forEach { enemy: Enemy? ->
+            if (enemy != null) {
+                if (enemy.getState().collidesWith(hero.getState()))
+                    enemy.changeState(container, "Attack")
+                else {
+                    val enemyPos = enemy.getState().run { (x + width) / 2 }
+                    val heroPos = hero.getState().run { (x + width) / 2 }
 
-        locationEnemies[location].forEach { enemy: Enemy ->
-            if (enemy.getState().collidesWith(hero.getState()))
-                enemy.changeState(container, "Attack")
-            else {
-                val enemyPos = enemy.getState().run { (x + width) / 2 }
-                val heroPos = hero.getState().run { (x + width) / 2 }
+                    if (enemyPos + 200 > heroPos && enemyPos < heroPos) {
+                        enemy.apply {
+                            changeState(container, "Walk", "Right")
+                            getState().body?.linearVelocityX = 5f
+                        }
+                    } else if (enemyPos - 200 < heroPos && enemyPos > heroPos) {
+                        enemy.apply {
+                            changeState(container, "Walk", "Left")
+                            getState().body?.linearVelocityX = -5f
+                        }
+                    } else
+                        enemy.changeState(container, "Idle")
+                }
+            }
+        }
+    }
 
-                if (enemyPos + 200 > heroPos && enemyPos < heroPos) {
-                    enemy.apply {
-                        changeState(container, "Walk", "Right")
-                        getState().body?.linearVelocityX = 5f
+    fun hitEnemy() {
+        if (hero.stateIndex == hero.getHeroState("Attack")) {
+            locationEnemies.forEach { enemy ->
+                for (i in enemy.indices) {
+                    if (enemy[i] == null)
+                        continue
+
+                    if (abs(hero.getState().x - enemy[i]!!.getState().x) <= 130.0 && hero.getState().currentSpriteIndex == 5) {
+                        enemy[i]!!.getState().removeFromParent()
+                        enemy[i] = null
                     }
                 }
-                else if (enemyPos - 200 < heroPos && enemyPos > heroPos) {
-                    enemy.apply {
-                        changeState(container, "Walk", "Left")
-                        getState().body?.linearVelocityX = -5f
-                    }
-                }
-                else
-                    enemy.changeState(container, "Idle")
             }
         }
     }

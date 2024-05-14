@@ -13,7 +13,8 @@ open class Hero(atlas: Array<Atlas>, container: Container) {
     var inMidAir: Boolean = false
     var isFall: Boolean = false
     protected val heroStates: MutableList<Sprite> = mutableListOf()
-    private var stateIndex: Int = 1
+    var stateIndex: Int = 1
+        private set
 
     companion object {
         val TIME_ATTACK: TimeSpan = .1.seconds
@@ -60,7 +61,7 @@ open class Hero(atlas: Array<Atlas>, container: Container) {
         else -> TIME_IDLE
     }
 
-    private fun getHeroState(state: String): Int = when(state) {
+    fun getHeroState(state: String): Int = when(state) {
         "Attack" -> { if (spriteReversed) 5 else 0 }
         "Idle" -> { if (spriteReversed) 6 else 1 }
         "Hit" -> { if (spriteReversed) 7 else 2 }
